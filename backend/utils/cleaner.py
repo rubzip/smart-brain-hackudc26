@@ -11,7 +11,7 @@ def clean_text(text: str) -> str:
 
     # 2. Eliminar caracteres de control y nulos (excepto \n)
     # Los PDFs y archivos de Word suelen traer caracteres no imprimibles que confunden al tokenizador.
-    text = re.sub(r'[\x00-\x09\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text)
+    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text)
 
     # 3. Unir palabras separadas por guiones a final de línea (típico de PDFs)
     # Ej: "embeb-\nding" -> "embedding"
