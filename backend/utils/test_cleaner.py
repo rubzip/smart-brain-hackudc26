@@ -1,6 +1,4 @@
 import pytest
-import re
-import unicodedata
 
 from cleaner import clean_text
 
