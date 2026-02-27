@@ -2,8 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-
-def get_webpage_text(url):
+def get_webpage_text(url) -> str:
     """Obtiene el texto de una página web dada su URL."""
     response = requests.get(url)
     if response.status_code == 200:
@@ -14,7 +13,7 @@ def get_webpage_text(url):
 def load_file() -> str:
     pass
 
-def load_pdf() -> str:
+def load_pdf(pdf_file) -> str:
     pass
 
 def load_youtube() -> str:
