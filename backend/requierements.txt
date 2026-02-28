@@ -9,3 +9,4 @@ openpyxl
 fastapi
 uvicorn
 python-multipart
+ollama

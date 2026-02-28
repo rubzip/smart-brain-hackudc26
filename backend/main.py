@@ -1,4 +1,6 @@
+import asyncio
 import io
+import json
 import uuid
 from datetime import datetime
 from enum import Enum
@@ -8,6 +10,12 @@ from typing import Literal
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, HttpUrl
+
+try:
+    import ollama
+    OLLAMA_AVAILABLE = True
+except ImportError:
+    OLLAMA_AVAILABLE = False
 
 from utils.loader import (
     get_docx_from_stream,
@@ -64,6 +72,18 @@ class ChatMessageResponse(BaseModel):
     status: Literal["queued", "processing", "done"] = "queued"
 
 
+class DailyTask(BaseModel):
+    id: str
+    text: str
+    completed: bool = False
+
+
+class DailyPlanResponse(BaseModel):
+    tasks: list[DailyTask]
+    generated_at: str
+    message: str
+
+
 app = FastAPI(
     title="Smart Brain API",
     version="0.1.0",
@@ -80,6 +100,60 @@ app.add_middleware(
 
 # Storage in-memory (sustituir por DB en producción)
 STORAGE: dict[str, dict] = {}
+
+# Caching system for daily plan
+DAILY_PLAN_CACHE: DailyPlanResponse | None = None
+DAILY_PLAN_LOCK = asyncio.Lock()
+DAILY_PLAN_REGENERATING = False
+
+
+async def _regenerate_daily_plan_background() -> None:
+    """Regenera el plan diario en background cuando hay cambios."""
+    global DAILY_PLAN_CACHE, DAILY_PLAN_REGENERATING
+    
+    async with DAILY_PLAN_LOCK:
+        DAILY_PLAN_REGENERATING = True
+        try:
+            if not OLLAMA_AVAILABLE:
+                DAILY_PLAN_REGENERATING = False
+                return
+            
+            DAILY_PLAN_CACHE = await _build_daily_plan()
+        except Exception as e:
+            print(f"Error regenerating daily plan: {e}")
+        finally:
+            DAILY_PLAN_REGENERATING = False
+
+
+async def _build_daily_plan() -> DailyPlanResponse:
+    """Construye un DailyPlanResponse basado en los items almacenados."""
+    prompt = _generate_daily_plan_prompt()
+    
+    if not prompt:
+        return DailyPlanResponse(
+            tasks=[],
+            generated_at=datetime.utcnow().isoformat(),
+            message="No stored items found to generate a plan."
+        )
+    
+    tasks = await _call_ollama_for_plan(prompt)
+    
+    if tasks is None:
+        tasks = [
+            DailyTask(id="1", text="📖 Review your stored resources", completed=False),
+            DailyTask(id="2", text="💻 Work on a project task", completed=False),
+            DailyTask(id="3", text="🏋️ Exercise", completed=False),
+            DailyTask(id="4", text="📝 Reflect on learnings", completed=False),
+        ]
+        message = "LLM response could not be parsed. Using fallback tasks."
+    else:
+        message = "Daily plan generated successfully from your stored items."
+    
+    return DailyPlanResponse(
+        tasks=tasks,
+        generated_at=datetime.utcnow().isoformat(),
+        message=message
+    )
 
 
 @app.get("/api/v1/health")
@@ -103,6 +177,7 @@ async def create_item_from_url(payload: URLItemCreate) -> StoredItemResponse:
             "created_at": datetime.utcnow().isoformat(),
         }
         STORAGE[item_id] = item_data
+        asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
             id=item_id,
             source_type="url",
@@ -124,6 +199,7 @@ async def create_item_from_url(payload: URLItemCreate) -> StoredItemResponse:
             "created_at": datetime.utcnow().isoformat(),
         }
         STORAGE[item_id] = item_data
+        asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
             id=item_id,
             source_type="url",
@@ -170,6 +246,7 @@ async def create_item_from_local_file(payload: LocalItemCreate) -> StoredItemRes
             "created_at": datetime.utcnow().isoformat(),
         }
         STORAGE[item_id] = item_data
+        asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
             id=item_id,
             source_type="local_file",
@@ -189,6 +266,7 @@ async def create_item_from_local_file(payload: LocalItemCreate) -> StoredItemRes
             "created_at": datetime.utcnow().isoformat(),
         }
         STORAGE[item_id] = item_data
+        asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
             id=item_id,
             source_type="local_file",
@@ -232,6 +310,7 @@ async def create_item_from_uploaded_file(file: UploadFile = File(...)) -> Stored
             "created_at": datetime.utcnow().isoformat(),
         }
         STORAGE[item_id] = item_data
+        asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
             id=item_id,
             source_type="uploaded_file",
@@ -249,6 +328,7 @@ async def create_item_from_uploaded_file(file: UploadFile = File(...)) -> Stored
             "created_at": datetime.utcnow().isoformat(),
         }
         STORAGE[item_id] = item_data
+        asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
             id=item_id,
             source_type="uploaded_file",
@@ -304,9 +384,116 @@ async def delete_item(item_id: str) -> None:
     if item_id not in STORAGE:
         raise HTTPException(status_code=404, detail="Item not found")
     del STORAGE[item_id]
+    asyncio.create_task(_regenerate_daily_plan_background())
 
 
-@app.post("/api/v1/chats/{chat_id}/messages", response_model=ChatMessageResponse, status_code=202)
-async def create_chat_message(chat_id: str, payload: ChatMessageCreate) -> ChatMessageResponse:
-    _ = (chat_id, payload)
-    raise HTTPException(status_code=501, detail="Not implemented yet")
+@app.get("/api/v1/daily-plan", response_model=DailyPlanResponse)
+async def generate_daily_plan() -> DailyPlanResponse:
+    """Retorna el plan diario cacheado, esperando si está regenerando."""
+    global DAILY_PLAN_CACHE
+    
+    if not OLLAMA_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Ollama is not available. Install the 'ollama' Python package and ensure ollama service is running."
+        )
+    
+    # Esperar a que termine la regeneración si está ocurriendo
+    async with DAILY_PLAN_LOCK:
+        if DAILY_PLAN_CACHE is not None:
+            return DAILY_PLAN_CACHE
+        
+        # Si no hay caché, generar ahora
+        DAILY_PLAN_CACHE = await _build_daily_plan()
+        return DAILY_PLAN_CACHE
+
+
+def _generate_daily_plan_prompt() -> str:
+    """Sintetiza un prompt con todos los elementos almacenados."""
+    items_summary = []
+    
+    for item_id, item_data in STORAGE.items():
+        source_type = item_data.get("source_type", "unknown")
+        title = item_data.get("title", "Untitled")
+        tags = item_data.get("tags", [])
+        text_preview = item_data.get("extracted_text", "")[:300]
+        
+        item_summary = f"- [{source_type}] {title}"
+        if tags:
+            item_summary += f" (Tags: {', '.join(tags)})"
+        if text_preview:
+            item_summary += f"\n  Preview: {text_preview}..."
+        
+        items_summary.append(item_summary)
+    
+    if not items_summary:
+        return ""
+    
+    prompt = (
+        "Based on the following stored items in a personal knowledge base, "
+        "generate a structured list of 5-7 daily goals/tasks that align with these resources and interests.\n\n"
+        "STORED ITEMS:\n"
+        + "\n".join(items_summary)
+        + "\n\n"
+        "Please return a JSON array with this exact format (and ONLY the JSON, no other text):\n"
+        '[\n'
+        '  {"id": "1", "text": "📖 Read X from resource Y", "completed": false},\n'
+        '  {"id": "2", "text": "💻 Work on Z project", "completed": false}\n'
+        ']\n\n'
+        "Requirements:\n"
+        "- Each task should include an emoji at the start\n"
+        "- Make tasks specific and actionable\n"
+        "- Prioritize diverse activities (learning, coding, health, creativity, etc.)\n"
+        "- Keep task text under 60 characters\n"
+        "- All tasks should start as not completed"
+    )
+    
+    return prompt
+
+
+async def _call_ollama_for_plan(prompt: str) -> list[DailyTask] | None:
+    """Llama a ollama para generar el plan diario."""
+    if not OLLAMA_AVAILABLE:
+        return None
+    
+    try:
+        response = ollama.generate(
+            model="phi",  # Cambia por el modelo que uses
+            prompt=prompt,
+            stream=False,
+        )
+        
+        response_text = response.get("response", "").strip()
+        
+        # Intentar parsear JSON de la respuesta
+        try:
+            tasks_data = json.loads(response_text)
+            if isinstance(tasks_data, list):
+                return [
+                    DailyTask(
+                        id=str(task.get("id", str(uuid.uuid4()))),
+                        text=task.get("text", ""),
+                        completed=task.get("completed", False)
+                    )
+                    for task in tasks_data
+                ]
+        except json.JSONDecodeError:
+            # Si falla el parsing, intentar extraer JSON del texto
+            import re
+            json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
+            if json_match:
+                tasks_data = json.loads(json_match.group())
+                return [
+                    DailyTask(
+                        id=str(task.get("id", str(uuid.uuid4()))),
+                        text=task.get("text", ""),
+                        completed=task.get("completed", False)
+                    )
+                    for task in tasks_data
+                ]
+        
+        return None
+    
+    except Exception as e:
+        print(f"Error calling ollama: {e}")
+        return None
