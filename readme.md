@@ -1,24 +1,11 @@
-# 📓 Mini NotebookLM Backend
+# Smart Brain HackUDC26
 
-Una API construida con **FastAPI** diseñada para ingestar documentos, limpiar el texto extraído y generar embeddings vectoriales para sistemas RAG (Retrieval-Augmented Generation).
+En nuestro dia a dia, vivimos con muchas interacciones, problemas. El diogenes digital dice que el ..% de enlaces que guardamos nunca son vistos. El sindrome de ... dice que las personas no pueden desconectar porque tienen la sensacion de que se estan olvidando de algo importante. 
 
-## 🚀 Características
+Es por esto que hemos implementado el Smart Brain, un sistema que hace que los humanos puedan centrarse en lo que realmente importa y tu agente en recordar todo lo que necesites. 
 
-* **Ingesta de documentos:** Extrae texto de diferentes formatos (PDF, TXT, etc.).
-* **Limpieza semántica:** Procesamiento de texto (normalización Unicode, unión de guiones, limpieza de caracteres) optimizado para no perder contexto en la vectorización.
-* **Generación de Embeddings:** Preparado para conectar con modelos de vectorización.
-* **Backend rápido:** Construido sobre FastAPI para un rendimiento asíncrono y alta concurrencia.
-
----
-
-## 🛠️ Requisitos Previos
-
-Asegúrate de tener instalado [uv](https://github.com/astral-sh/uv), el gestor de paquetes y entornos ultrarrápido escrito en Rust.
-
-Si no lo tienes, instálalo con:
-```bash
-uv venv --python 3.11
-source venv/bin/activate
-uv install
-```
-
+Entre las multiples funcionalidades que ofrece el Smart Brain, destacan:
+ * Trackeo de propósitos diarios. Establece unos propósitos diarios y Smart Brain te ayudara a alcanzarlos.
+ * Trackeo de emociones.
+ * Recordatorio de tareas.
+ 
