@@ -616,7 +616,7 @@ async def _call_ollama_for_plan(prompt: str) -> list[DailyTask] | None:
             print(f"Ollama attempt {attempt}/{max_retries}")
 
             response = ollama.generate(
-                model="llama3.2",
+                model="gpt-oss:20b",
                 prompt=prompt,
                 stream=False,
             )
