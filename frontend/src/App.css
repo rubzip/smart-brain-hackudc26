@@ -1,11 +1,47 @@
 .app-shell {
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
   gap: 1rem;
   min-height: 100vh;
   padding: 1rem;
   box-sizing: border-box;
   background: #f5f7fb;
+  scroll-behavior: smooth;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c7d2e6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2937;
+  padding: 0.45rem 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  border-color: #2563eb;
+  color: #2563eb;
 }
 
 .main-area {
@@ -83,6 +119,11 @@ button:hover {
   .main-area,
   .bottom-bar {
     grid-template-columns: 1fr;
+  }
+
+  .top-nav {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .left-column {

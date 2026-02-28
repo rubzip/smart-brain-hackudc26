@@ -3,6 +3,18 @@ import './App.css'
 function App() {
   return (
     <div className="app-shell">
+      <header className="top-nav panel">
+        <h1 className="app-title">Smart Brain</h1>
+        <nav className="nav-actions" aria-label="Quick navigation">
+          <a className="nav-link" href="#add-item-panel">
+            Add items
+          </a>
+          <a className="nav-link" href="#chat-panel">
+            Chat
+          </a>
+        </nav>
+      </header>
+
       <main className="main-area">
         <section className="left-column">
           <article className="panel">
@@ -36,12 +48,12 @@ function App() {
       </main>
 
       <footer className="bottom-bar">
-        <section className="panel bottom-item">
+        <section className="panel bottom-item" id="add-item-panel">
           <h2>Add new thing</h2>
           <button type="button">+ New item</button>
         </section>
 
-        <section className="panel bottom-item">
+        <section className="panel bottom-item" id="chat-panel">
           <h2>Start chat</h2>
           <div className="chat-row">
             <input type="text" placeholder="Write a message..." />
