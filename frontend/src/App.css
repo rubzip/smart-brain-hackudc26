@@ -486,7 +486,8 @@ body {
 
 .carousel-track {
   position: relative;
-  height: 520px;
+  height: 560px;
+  /* Increased to accommodate content */
   flex-grow: 1;
 }
 
@@ -499,7 +500,8 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
   border-radius: 28px;
-  padding: 1.5rem;
+  padding: 1.25rem;
+  /* Slightly reduced */
   display: flex;
   flex-direction: column;
   transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
@@ -527,7 +529,8 @@ body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  /* Slightly reduced */
 }
 
 .video-embed {
@@ -598,11 +601,28 @@ body {
   font-size: 0.95rem;
   color: var(--text-muted);
   line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  max-height: 4.8em;
+  /* Exactly 3 lines */
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Custom premium scrollbar for card summary */
+.card-summary::-webkit-scrollbar {
+  width: 4px;
+}
+
+.card-summary::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.card-summary::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.card-summary::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
 
 .open-btn-link {
@@ -612,10 +632,12 @@ body {
   background: var(--primary);
   color: white;
   text-decoration: none;
-  padding: 1rem;
+  padding: 0.9rem;
+  /* Slightly reduced */
   border-radius: 16px;
   font-weight: 700;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
+  /* Slightly reduced */
   transition: all 0.3s;
 }
 
