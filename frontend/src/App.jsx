@@ -26,14 +26,17 @@ function App() {
     sad: "It's okay to feel down. Be kind to yourself. Focus on small wins today. 🫂"
   }
 
-  const handleMoodSubmit = () => {
-    if (selectedMood) {
-      setMoodFeedback(moodPhrases[selectedMood])
-      if (selectedMood === 'happy') {
-        triggerDopamine()
-      }
-    }
-  }
+  const handleMoodSubmit = (moodValue) => {
+    setSelectedMood(moodValue);
+    setMoodFeedback(moodPhrases[moodValue]);
+    if (moodValue === 'happy') triggerDopamine();
+
+    // Auto-hide feedback after 5 seconds
+    setTimeout(() => {
+      setMoodFeedback(null);
+      setSelectedMood(null);
+    }, 5000);
+  };
 
   const suggestions = [
     {
@@ -150,42 +153,6 @@ function App() {
       </header>
 
       <main className="main-area">
-        <section className="mood-dynamic-island-container">
-          <div className={`dynamic-island ${moodFeedback ? 'expanded' : ''}`}>
-            {!moodFeedback ? (
-              <div className="island-grid">
-                <span className="island-title">How are you?</span>
-                <div className="island-moods">
-                  {moods.map(mood => (
-                    <button
-                      key={mood.value}
-                      className={`island-mood-btn ${selectedMood === mood.value ? 'active' : ''}`}
-                      onClick={() => {
-                        setSelectedMood(mood.value);
-                        // Auto submit for even less interaction
-                        const phrases = {
-                          happy: "Happiness is contagious! Keep that energy! 🌟",
-                          angry: "Channel that fire into a challenge. Deep breaths. 🔥",
-                          sad: "It's okay to feel down. Focus on small wins. 🫂"
-                        };
-                        setMoodFeedback(phrases[mood.value]);
-                        if (mood.value === 'happy') triggerDopamine();
-                      }}
-                    >
-                      <span className="mood-emoji">{mood.emoji}</span>
-                      <span className="mood-label">{mood.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="island-feedback">
-                <span className="island-message">{moodFeedback}</span>
-                <button className="island-close" onClick={() => { setMoodFeedback(null); setSelectedMood(null); }}>✕</button>
-              </div>
-            )}
-          </div>
-        </section>
 
         <section className="left-column">
           <article className="panel dopamine-todo">
@@ -308,6 +275,34 @@ function App() {
           </div>
         </section>
       </footer>
+
+      {/* Dynamic Floating Mood Dock */}
+      <div className="mood-dock-container">
+        <div className={`mood-dock ${moodFeedback ? 'expanded' : ''}`}>
+          {!moodFeedback ? (
+            <div className="dock-content">
+              <span className="dock-prompt">How's your vibe?</span>
+              <div className="dock-moods">
+                {moods.map(mood => (
+                  <button
+                    key={mood.value}
+                    className="dock-mood-btn"
+                    onClick={() => handleMoodSubmit(mood.value)}
+                  >
+                    <span className="dock-emoji">{mood.emoji}</span>
+                    <span className="dock-label">{mood.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="dock-feedback">
+              <span className="dock-message">{moodFeedback}</span>
+              <button className="dock-close" onClick={() => { setMoodFeedback(null); setSelectedMood(null); }}>✕</button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

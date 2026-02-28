@@ -241,53 +241,86 @@ body {
   min-height: 500px;
 }
 
-/* Unified Dynamic Island Mood Tracker */
-.mood-dynamic-island-container {
+/* Floating Mood Dock (Dynamic Island 2.0) */
+.mood-dock-container {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
   display: flex;
   justify-content: center;
-  width: 100%;
-  grid-area: top;
-  margin-bottom: 1rem;
+  pointer-events: none;
 }
 
-.dynamic-island {
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
+.mood-dock {
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  padding: 0.5rem 1.5rem;
+  padding: 0.6rem 2rem;
   display: flex;
   align-items: center;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  min-height: 52px;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(99, 102, 241, 0.2);
+  min-height: 56px;
+  max-width: fit-content;
+  animation: floatDock 4s ease-in-out infinite;
+  opacity: 1;
+  visibility: visible;
 }
 
-.dynamic-island.expanded {
-  padding: 0.75rem 2rem;
+.mood-dock:not(.expanded):not(:hover) {
+  /* Subtle state when not interacted with */
+}
+
+@keyframes floatDock {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.mood-dock:hover {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6),
+    0 0 30px rgba(99, 102, 241, 0.4);
+}
+
+.mood-dock.expanded {
+  padding: 0.8rem 2.5rem;
   background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
 }
 
-.island-grid {
+.dock-content {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
-.island-title {
-  font-size: 0.875rem;
+.dock-prompt {
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
-.island-moods {
+.dock-moods {
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
-.island-mood-btn {
+.dock-mood-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -295,70 +328,84 @@ body {
   flex-direction: column;
   align-items: center;
   position: relative;
-  transition: transform 0.2s;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.island-mood-btn:hover {
-  transform: scale(1.2) translateY(-2px);
+.dock-mood-btn:hover {
+  transform: scale(1.4) translateY(-5px);
 }
 
-.island-mood-btn .mood-emoji {
-  font-size: 1.5rem;
+.dock-emoji {
+  font-size: 1.75rem;
 }
 
-.island-mood-btn .mood-label {
+.dock-label {
   position: absolute;
-  top: 100%;
-  font-size: 0.6rem;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--primary);
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
   pointer-events: none;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-.island-mood-btn:hover .mood-label {
+.dock-mood-btn:hover .dock-label {
   opacity: 1;
+  top: -30px;
 }
 
-.island-feedback {
+.dock-feedback {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  animation: slideLeft 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  gap: 2.5rem;
+  animation: dockSlideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.island-message {
-  font-size: 0.9rem;
+.dock-message {
+  font-size: 1rem;
   font-weight: 600;
   color: #fff;
+  text-align: center;
 }
 
-.island-close {
+.dock-close {
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
-  transition: background 0.2s;
+  font-size: 9px;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
-@keyframes slideLeft {
+.dock-close:hover {
+  background: var(--accent);
+  transform: rotate(90deg);
+}
+
+@keyframes dockSlideUp {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(20px);
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
