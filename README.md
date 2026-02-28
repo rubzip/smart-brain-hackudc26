@@ -16,6 +16,13 @@ En la era de la sobrecarga informativa, sufrimos de **Diógenes Digital**: guard
 - **Extensión para compatible con navegadores basados en Chromium y Firefox**: Captura conocimiento mientras navegas con un solo clic.
 
 ---
+## Trabajo Futuro
+Debido a las limitaciones del reto no se han podido implementar todas las funcionalidades propuestas, que nos hubieran gustado implementar:
+- `Google Calendar Sync`: Para obtener un token de Calendar API se requiere una URL pública para la webapp, lo que se escapa de nuestra capacidad.
+- `Almacenamiento de datos no estructurados`: Hasta ahora solo almacenamos ficheros como texto plano (PDF, DOCX, excel, PDF(OCR)), pero no se han almacenado datos no estructurados como imágenes, vídeos, etc. Respecto a videos y audio la principal limitación se encuentra a no disponer modelos `Speech2Text` que puedan convertir el audio en texto.
+
+
+---
 
 ## 🛠️ Stack Tecnológico
 
@@ -70,5 +77,6 @@ npm run dev
 ## 📄 Licencia
 Este proyecto está bajo la Licencia MIT. Para más detalles, consulta el archivo [LICENSE](LICENSE).
 
+Justificación...
 ---
-*Desarrollado en 36 horas por [Alejandro](https://github.com/alejandro2406)), [Cosme](https://github.com/cosme8) y [Rubén](https://github.com/rubzip) para el HackUDC 2026 durante el 27 de Febrero de 2026 y el 1 de Marzo de 2026*.
+*Desarrollado en 36 horas por [Alejandro](https://github.com/alejandro2406), [Cosme](https://github.com/cosme8) y [Rubén](https://github.com/rubzip) para el HackUDC 2026 durante el 27 de Febrero de 2026 y el 1 de Marzo de 2026*.

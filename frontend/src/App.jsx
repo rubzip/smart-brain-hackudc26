@@ -6,7 +6,7 @@ import Header from './components/Header'
 import TodoList from './components/TodoList'
 import Schedule from './components/Schedule'
 import Suggestions from './components/Suggestions'
-import Footer from './components/Footer'
+
 import MoodDock from './components/MoodDock'
 import StatsModal from './components/StatsModal'
 import ChatInterface from './components/ChatInterface'
@@ -24,7 +24,16 @@ function App() {
   const [selectedMood, setSelectedMood] = useState(null)
   const [moodFeedback, setMoodFeedback] = useState(null)
   const [isStatsOpen, setIsStatsOpen] = useState(false)
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
+
+  const openAdd = React.useCallback(() => setIsAddOpen(true), [])
+  const closeAdd = React.useCallback(() => setIsAddOpen(false), [])
+  const openSearch = React.useCallback(() => setIsSearchOpen(true), [])
+  const closeSearch = React.useCallback(() => setIsSearchOpen(false), [])
+  const openChat = React.useCallback(() => setIsChatOpen(true), [])
+  const closeChat = React.useCallback(() => setIsChatOpen(false), [])
 
   const [searchResults, setSearchResults] = useState([])
   const [isSearching, setIsSearching] = useState(false)
@@ -74,7 +83,7 @@ function App() {
           text: task.text,
           completed: task.completed || false
         }))
-        
+
         // Merge con estado local para preservar cambios optimistas
         setTasks(prevTasks => {
           const merged = formattedTasks.map(serverTask => {
@@ -246,7 +255,7 @@ function App() {
       summary: 'A legendary masterpiece of digital culture. An essential piece of internet history that everyone should experience.'
     }
   ]
-  
+
   const [currentSuggestion, setCurrentSuggestion] = useState(0)
 
   const completedCount = tasks.filter(t => t.completed).length
@@ -352,10 +361,14 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Header />
+      <Header
+        onAddClick={openAdd}
+        onSearchClick={openSearch}
+        onChatClick={openChat}
+      />
 
       <main className="main-area">
-        <section className="left-column">
+        <section className="column-goals">
           <TodoList
             tasks={tasks}
             completedCount={completedCount}
@@ -363,23 +376,18 @@ function App() {
             toggleTask={toggleTask}
             showDelayedSpinner={showDailyGoalsSpinner && tasksLoading}
           />
+        </section>
 
+        <section className="column-pending">
           <Schedule
             accessToken={accessToken}
             handleAuthClick={handleAuthClick}
             schedule={schedule}
             upNext={upNext}
           />
-
-          <AddItem />
-
-          <SearchTool
-            onSearch={handleGlobalSearch}
-            onClear={clearSearch}
-          />
         </section>
 
-        <div className="right-column">
+        <section className="column-suggestions">
           {isSearching && searchResults.length === 0 ? (
             <div className="panel search-no-results">
               <span className="no-results-emoji">🤷‍♂️</span>
@@ -396,14 +404,24 @@ function App() {
               setCurrentSuggestion={setCurrentSuggestion}
             />
           )}
-        </div>
+        </section>
       </main>
 
-      <Footer onChatClick={() => setIsChatOpen(true)} />
+      <AddItem
+        isOpen={isAddOpen}
+        onClose={closeAdd}
+      />
+
+      <SearchTool
+        isOpen={isSearchOpen}
+        onClose={closeSearch}
+        onSearch={handleGlobalSearch}
+        onClear={clearSearch}
+      />
 
       <ChatInterface
         isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
+        onClose={closeChat}
       />
 
       <MoodDock
@@ -423,5 +441,6 @@ function App() {
     </div>
   )
 }
+
 
 export default App
