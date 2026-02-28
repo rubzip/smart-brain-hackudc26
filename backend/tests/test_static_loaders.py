@@ -49,20 +49,18 @@ def test_load_odt():
         stream = io.BytesIO(f.read())
         text = get_odt_from_stream(stream)
         
-    assert "id_ticket" in text
-    assert "TK-2024-0401" in text
+    assert "MANUAL DE USUARIO" in text
 
 def test_load_docx():
     """Prueba la carga de archivos DOCX del directorio static."""
-    file_path = STATIC_DIR / "incidencias_soporte_Q4_2024.docx"
+    file_path = STATIC_DIR / "certificado_ISO9001_novatech.docx"
     assert file_path.exists()
     
     with open(file_path, "rb") as f:
         stream = io.BytesIO(f.read())
         text = get_docx_from_stream(stream)
         
-    assert "id_ticket" in text
-    assert "TK-2024-0401" in text
+    assert "CERTIFICADO DE REGISTRO DE EMPRESA" in text
 
 def test_load_pdf_large():
     """Prueba la carga de un PDF más grande (Estatuto)."""
