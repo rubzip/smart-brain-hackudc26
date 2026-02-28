@@ -1,8 +1,66 @@
 # Smart Brain HackUDC26
+En la era de la sobrecarga informativa, sufrimos de **Diógenes Digital**: guardamos miles de enlaces, archivos y vídeos que nunca volvemos a ver. El ruido constante nos impide enfocarnos en lo que realmente importa. **Smart Brain** nace para solucionar esto, convirtiéndose en tu agente personal que recuerda por ti, analiza tu contenido y te ayuda a alcanzar tus metas diarias.
 
-En nuestro dia a dia, vivimos con muchas interacciones, problemas. El diogenes digital dice que el ..% de enlaces que guardamos nunca son vistos. El sindrome de ... dice que las personas no pueden desconectar porque tienen la sensacion de que se estan olvidando de algo importante. 
+---
 
-Es por esto que hemos implementado el Smart Brain, un sistema que hace que los humanos puedan centrarse en lo que realmente importa y tu agente en recordar todo lo que necesites. 
+## ✨ Características Principales
+
+### 🧠 Cerebro AI (Local First)
+- **Ingesta**: Procesa PDFs, documentos Office (Docx, ODT), hojas de cálculo (Excel, CSV) y contenido web (URLs/YouTube).
+- **IA Local**: Resúmenes y análisis de sentimiento sin que tus datos salgan de tu red local.
+- **Búsqueda**: Encuentra cualquier cosa en tu cerebro mediante palabras clave o búsqueda semántica.
+
+### 📅 Ecosistema Conectado
+- **Google Calendar Sync** (Future work): Visualiza tu día a un vistazo con integración nativa unidireccional.
+- **Asistente de Chat**: Conversa con tus archivos (RAG).
+- **Extensión para compatible con navegadores basados en Chromium y Firefox**: Captura conocimiento mientras navegas con un solo clic.
+
+---
+
+## 🛠️ Stack Tecnológico
+
+### [Frontend](./frontend)
+- **Framework**: React + Vite + Vanilla CSS
+
+### [Backend](./backend)
+- **Framework**: FastAPI
+- **LLM**: Ollama (Llama 3 (**Pesos abiertos**))
+- **Metodología**: Test Driven Development (TDD)
+
+### [Extensión](./extension)
+- **UI**: React para coherencia visual total.
+- **Comunicación**: Chrome/Firefox Extension API para captura de metadatos en tiempo real.
+
+---
+
+## 🚀 Instalación y Configuración
+
+### 1. Preparación del Backend
+```bash
+cd backend
+# Configuración automática del entorno
+make setup && make install
+source .venv/bin/activate
+# Iniciar servidor
+make run
+```
+*Asegúrate de tener [Ollama](https://ollama.ai) instalado y corriendo localmente.*
+
+### 2. Preparación del Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*La aplicación estará disponible en `http://localhost:5175`.*
+
+### 3. Instalación de la Extensión
+0. *(Opcional)* `cd extension && npm run build`
+1. Ve a `chrome://extensions/` en tu navegador.
+2. Activa el "Modo desarrollador".
+3. Haz clic en "Cargar descomprimida" y selecciona la carpeta `./extension/dist`.
+
+---
 
 Entre las multiples funcionalidades que ofrece el Smart Brain, destacan:
  * Trackeo de propósitos diarios. Establece unos propósitos diarios y Smart Brain te ayudara a alcanzarlos.
@@ -125,3 +183,52 @@ Carga la carpeta `extension` como una "Unpacked Extension" en `chrome://extensio
 This project is licensed under the XXX License - see the [LICENSE](LICENSE) file for details.
 
 The reason, ...
+## 🚀 Instalación y Configuración
+
+### 1. Preparación del Backend
+```bash
+cd backend
+# Configuración automática del entorno
+make setup && make install
+source .venv/bin/activate
+# Iniciar servidor
+make run
+```
+*Asegúrate de tener [Ollama](https://ollama.ai) instalado y corriendo localmente.*
+
+### 2. Preparación del Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*La aplicación estará disponible en `http://localhost:5175`.*
+
+### 3. Instalación de la Extensión
+1. Ve a `chrome://extensions/` en tu navegador.
+2. Activa el "Modo desarrollador".
+3. Haz clic en "Cargar descomprimida" y selecciona la carpeta `./extension`.
+
+---
+
+## 📅 Configuración de Google Calendar
+
+Smart Brain utiliza el flujo de **Google Identity Services (GIS)** para autenticación 100% frontend.
+
+1. Crea un proyecto en [Google Cloud Console](https://console.cloud.google.com/).
+2. Habilita la **Google Calendar API**.
+3. En la **Pantalla de Consentimiento OAuth**, añade el scope `auth/calendar.readonly`.
+4. Crea un **ID de cliente de OAuth** (Aplicación Web).
+5. Añade `http://localhost:5175` como origen autorizado.
+6. Pega tu Client ID en `frontend/src/App.jsx`.
+
+---
+
+## 🤝 Contribuir
+¿Quieres hacer Smart Brain aún más inteligente? Revisa nuestro [CONTRIBUTING.md](CONTRIBUTING.md) y únete a la revolución de la productividad.
+
+## 📄 Licencia
+Este proyecto está bajo la Licencia MIT. Para más detalles, consulta el archivo [LICENSE](LICENSE).
+
+---
+*Desarrollado con ❤️ para el HackUDC 2026.*
