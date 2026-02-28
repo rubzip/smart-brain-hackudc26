@@ -10,5 +10,5 @@
 - [ ] Conectar interfaz extension con API
 - [ ] Unificar interfaces webapp y extension
 - [ ] Documentar tecnologías y arquitectura
-- [ ] 
+- [ ] RAG
 
