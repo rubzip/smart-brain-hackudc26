@@ -134,6 +134,30 @@ body {
   font-weight: 700;
 }
 
+.daily-goals-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.daily-goals-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: daily-goals-spin 0.7s linear infinite;
+}
+
+@keyframes daily-goals-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .progress-stat {
   font-size: 0.875rem;
   font-weight: 800;

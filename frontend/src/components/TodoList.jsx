@@ -1,12 +1,19 @@
 import React from 'react';
 
-const TodoList = ({ tasks, completedCount, progress, toggleTask }) => {
+const TodoList = ({ tasks, completedCount, progress, toggleTask, showDelayedSpinner = false }) => {
     return (
         <article className="panel dopamine-todo">
             <div className="todo-header">
                 <h2>Daily Goals</h2>
                 <div className="progress-stat">{completedCount}/{tasks.length}</div>
             </div>
+
+            {showDelayedSpinner && (
+                <div className="daily-goals-loading" role="status" aria-live="polite">
+                    <span className="daily-goals-spinner" aria-hidden="true"></span>
+                    <span>Generating goals…</span>
+                </div>
+            )}
 
             <div className="progress-container">
                 <div className="progress-bar" style={{ width: `${progress}%` }}></div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import './App.css'
 
 // Import components
@@ -12,13 +12,14 @@ import StatsModal from './components/StatsModal'
 import ChatInterface from './components/ChatInterface'
 import AddItem from './components/AddItem'
 import SearchTool from './components/SearchTool'
-
-const API_BASE_URL = 'http://localhost:5000/api/v1'
+import { API_BASE_URL } from './config'
 
 function App() {
   const [tasks, setTasks] = useState([])
   const [tasksLoading, setTasksLoading] = useState(true)
+  const [showDailyGoalsSpinner, setShowDailyGoalsSpinner] = useState(false)
   const [tasksError, setTasksError] = useState(null)
+  const slowDailyGoalsTimerRef = useRef(null)
 
   const [selectedMood, setSelectedMood] = useState(null)
   const [moodFeedback, setMoodFeedback] = useState(null)
@@ -51,8 +52,16 @@ function App() {
   // Fetch daily plan from backend
   useEffect(() => {
     const fetchDailyPlan = async () => {
+      if (slowDailyGoalsTimerRef.current) {
+        clearTimeout(slowDailyGoalsTimerRef.current)
+      }
       setTasksLoading(true)
+      setShowDailyGoalsSpinner(false)
       setTasksError(null)
+      slowDailyGoalsTimerRef.current = setTimeout(() => {
+        setShowDailyGoalsSpinner(true)
+      }, 1200)
+
       try {
         const response = await fetch(`${API_BASE_URL}/daily-plan`)
         if (!response.ok) {
@@ -85,13 +94,23 @@ function App() {
           { id: '3', text: '🏋️ Exercise', completed: false },
         ])
       } finally {
+        if (slowDailyGoalsTimerRef.current) {
+          clearTimeout(slowDailyGoalsTimerRef.current)
+          slowDailyGoalsTimerRef.current = null
+        }
+        setShowDailyGoalsSpinner(false)
         setTasksLoading(false)
       }
     }
     fetchDailyPlan()
     // Refresh daily plan every 3 seconds
     const interval = setInterval(fetchDailyPlan, 3000)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      if (slowDailyGoalsTimerRef.current) {
+        clearTimeout(slowDailyGoalsTimerRef.current)
+      }
+    }
   }, [])
 
   // IMPORTANT: Replace with your actual Google OAuth Client ID
@@ -183,7 +202,7 @@ function App() {
 
     // Persist sentiment to backend
     try {
-      await fetch('http://localhost:8000/api/v1/sentiments', {
+      await fetch(`${API_BASE_URL}/sentiments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sentiment: moodValue }),
@@ -297,7 +316,7 @@ function App() {
     setIsSearching(true);
     try {
       const tagParams = tags.length > 0 ? `&tags=${tags.join(',')}` : '';
-      const response = await fetch(`http://localhost:8000/api/v1/items?q=${query}${tagParams}`);
+      const response = await fetch(`${API_BASE_URL}/items?q=${query}${tagParams}`);
       const data = await response.json();
 
       const mappedResults = (data.items || []).map(item => ({
@@ -342,6 +361,7 @@ function App() {
             completedCount={completedCount}
             progress={progress}
             toggleTask={toggleTask}
+            showDelayedSpinner={showDailyGoalsSpinner && tasksLoading}
           />
 
           <Schedule

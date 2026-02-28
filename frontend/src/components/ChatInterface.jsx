@@ -1,5 +1,6 @@
 import React from 'react';
 import { DeepChat } from 'deep-chat-react';
+import { API_BASE_URL } from '../config';
 
 const ChatInterface = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
@@ -15,7 +16,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
                 <DeepChat
                     demo={false}
                     request={{
-                        url: 'http://localhost:8000/api/v1/chat',
+                        url: `${API_BASE_URL}/chat`,
                         method: 'POST',
                         serialize: (body) => {
                             const lastMessage = body.messages[body.messages.length - 1];

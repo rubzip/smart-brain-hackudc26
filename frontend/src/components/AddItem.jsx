@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../config';
 
 const AddItem = () => {
     const [activeTab, setActiveTab] = useState('url'); // 'url' or 'upload'
@@ -16,7 +17,7 @@ const AddItem = () => {
         if (!urlInfo.url) return;
         setStatus('saving');
         try {
-            const response = await fetch('http://localhost:8000/api/v1/items/urls', {
+            const response = await fetch(`${API_BASE_URL}/items/urls`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -48,7 +49,7 @@ const AddItem = () => {
         // but we'll include them if the endpoint supports it in query or similar.
 
         try {
-            const response = await fetch('http://localhost:8000/api/v1/items/files', {
+            const response = await fetch(`${API_BASE_URL}/items/files`, {
                 method: 'POST',
                 body: formData,
             });

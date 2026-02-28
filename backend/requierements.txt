@@ -11,3 +11,5 @@ uvicorn
 python-multipart
 ollama
 yt-dlp
+asyncpg
+python-dotenv

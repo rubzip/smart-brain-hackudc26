@@ -43,16 +43,6 @@ CREATE TABLE IF NOT EXISTS tasks (
     completed_at TIMESTAMP WITH TIME ZONE
 );
 
--- Chat messages table: stores user chat history
-CREATE TABLE IF NOT EXISTS chat_messages (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    chat_id UUID NOT NULL, -- Groups messages into conversations
-    role VARCHAR(20) NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
-    content TEXT NOT NULL,
-    retrieval_scope UUID[], -- Item IDs used for context in this message
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_items_source_type ON items(source_type);
 CREATE INDEX IF NOT EXISTS idx_items_status ON items(status);
@@ -65,9 +55,6 @@ CREATE INDEX IF NOT EXISTS idx_embeddings_item_id ON embeddings(item_id);
 
 CREATE INDEX IF NOT EXISTS idx_tasks_completed ON tasks(completed);
 CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at DESC);
-
-CREATE INDEX IF NOT EXISTS idx_chat_messages_chat_id ON chat_messages(chat_id);
-CREATE INDEX IF NOT EXISTS idx_chat_messages_created_at ON chat_messages(created_at DESC);
 
 -- Updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -100,7 +87,6 @@ FOR EACH ROW EXECUTE FUNCTION update_task_completed_at();
 COMMENT ON TABLE items IS 'Stores all knowledge base items (URLs, files, documents)';
 COMMENT ON TABLE embeddings IS 'Vector embeddings for semantic search and RAG';
 COMMENT ON TABLE tasks IS 'Persistent daily tasks generated from items';
-COMMENT ON TABLE chat_messages IS 'Chat conversation history with RAG context';
 
 COMMENT ON COLUMN embeddings.embedding IS 'Vector embedding (384d for all-MiniLM-L6-v2, adjust based on model)';
 COMMENT ON COLUMN tasks.generated_from_items IS 'Snapshot of all item IDs present when task was generated';

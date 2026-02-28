@@ -1,31 +1,38 @@
 import asyncio
+import io
+import json
 import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
+from uuid import UUID
+
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-
-from models import (
-    DailyPlanResponse,
-    DailyTask,
-    SentimentCreate,
-    SentimentResponse,
-    URLItemCreate,
-    StoredItemResponse,
-    LocalItemCreate,
-    FocusView,
-)
-
+from pydantic import BaseModel, Field, HttpUrl
 
 try:
     import ollama
-
     OLLAMA_AVAILABLE = True
 except ImportError:
     OLLAMA_AVAILABLE = False
 
+from database.connection import db
+from database.item_dao import ItemDAO
+from database.task_dao import TaskDAO
+from models import (
+    DailyPlanResponse,
+    DailyTask,
+    FocusView,
+    LocalItemCreate,
+    SentimentCreate,
+    SentimentResponse,
+    StoredItemResponse,
+    URLItemCreate,
+)
 from utils.loader import (
     get_docx_from_stream,
     get_excel_from_stream,
@@ -39,7 +46,7 @@ from utils.cleaner import clean_text
 app = FastAPI(
     title="Smart Brain API",
     version="0.1.0",
-    description="API REST placeholder para items almacenados y chat RAG.",
+    description="API REST para items almacenados y chat RAG.",
 )
 
 app.add_middleware(
@@ -50,6 +57,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Database DAOs
+item_dao: ItemDAO | None = None
+task_dao: TaskDAO | None = None
+
 # Storage in-memory (sustituir por DB en producción)
 STORAGE: dict[str, dict] = {}
 SENTIMENTS_STORAGE: list[dict] = []
@@ -57,10 +68,32 @@ SENTIMENTS_STORAGE: list[dict] = []
 # Persistent tasks: {task_id -> {"text": str, "completed": bool, "generated_from_items": list[str]}}
 PERSISTENT_TASKS: dict[str, dict] = {}
 
-# Caching system for daily plan
-DAILY_PLAN_CACHE: DailyPlanResponse | None = None
+# Daily plan cache
 DAILY_PLAN_LOCK = asyncio.Lock()
+DAILY_PLAN_CACHE: DailyPlanResponse | None = None
 DAILY_PLAN_REGENERATING = False
+
+@app.on_event("startup")
+async def startup():
+    """Initialize database connection on startup."""
+    global item_dao, task_dao
+    await db.connect()
+    item_dao = ItemDAO(db.pool)
+    task_dao = TaskDAO(db.pool)
+    print("✓ DAOs initialized")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    """Close database connection on shutdown."""
+    await db.disconnect()
+    print("✓ Database disconnected")
+
+
+@app.get("/api/v1/health")
+async def health() -> dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "ok", "database": "connected" if db.pool else "disconnected"}
 
 
 async def _regenerate_daily_plan_background() -> None:
@@ -79,11 +112,22 @@ async def _regenerate_daily_plan_background() -> None:
 
             # Solo generar nuevas si hay menos de 5 activas
             if len(active_tasks) < 5:
-                new_tasks = await _call_ollama_for_plan(_generate_daily_plan_prompt())
+                prompt = await _generate_daily_plan_prompt()
+                new_tasks = await _call_ollama_for_plan(prompt)
                 if new_tasks:
                     for task in new_tasks:
-                        task_id = str(uuid.uuid4())
-                        PERSISTENT_TASKS[task_id] = {
+                        # Crear tarea en la base de datos
+                        task_data = {
+                            "text": task.text,
+                            "completed": False,
+                            "generated_from_item": task.generated_from,
+                            "generated_from_items": list(STORAGE.keys()),
+                        }
+                        task_id = await task_dao.create(task_data)
+                        # Convertir UUID a string para PERSISTENT_TASKS
+                        task_id_str = str(task_id)
+                        # Actualizar cache en memoria para disponibilidad inmediata
+                        PERSISTENT_TASKS[task_id_str] = {
                             "text": task.text,
                             "completed": False,
                             "generated_from_item": task.generated_from,
@@ -114,13 +158,23 @@ async def _build_daily_plan_from_persistent() -> DailyPlanResponse:
 
     # Si no hay tareas activas, intentar generar nuevas
     if not active_tasks and OLLAMA_AVAILABLE:
-        prompt = _generate_daily_plan_prompt()
+        prompt = await _generate_daily_plan_prompt()
         if prompt:
             new_tasks = await _call_ollama_for_plan(prompt)
             if new_tasks:
                 for task in new_tasks:
-                    task_id = str(uuid.uuid4())
-                    PERSISTENT_TASKS[task_id] = {
+                    # Crear tarea en la base de datos
+                    task_data = {
+                        "text": task.text,
+                        "completed": False,
+                        "generated_from_item": task.generated_from,
+                        "generated_from_items": list(STORAGE.keys()),
+                    }
+                    task_id = await task_dao.create(task_data)
+                    # Convertir UUID a string para PERSISTENT_TASKS
+                    task_id_str = str(task_id)
+                    # Actualizar cache en memoria para disponibilidad inmediata
+                    PERSISTENT_TASKS[task_id_str] = {
                         "text": task.text,
                         "completed": False,
                         "generated_from_item": task.generated_from,
@@ -144,52 +198,49 @@ async def health() -> dict[str, str]:
 
 @app.post("/api/v1/items/urls", response_model=StoredItemResponse, status_code=201)
 async def create_item_from_url(payload: URLItemCreate) -> StoredItemResponse:
-    item_id = str(uuid.uuid4())
+    if not item_dao:
+        raise HTTPException(status_code=503, detail="Database not initialized")
+    
     try:
         extracted_text = get_webpage_text(str(payload.url))
         cleaned_text = clean_text(extracted_text)
+        
         item_data = {
-            "id": item_id,
             "source_type": "url",
             "title": payload.title or str(payload.url),
             "url": str(payload.url),
             "tags": payload.tags,
             "extracted_text": cleaned_text,
-            "status": "ready",
-            "created_at": datetime.utcnow().isoformat(),
+            "status": "ready"
         }
-        STORAGE[item_id] = item_data
+        
+        # Insert into database
+        item_id = await item_dao.create(item_data)
+        
+        # Also update in-memory cache for immediate availability
+        STORAGE[str(item_id)] = {**item_data, "id": str(item_id)}
+        
+        # Trigger background regeneration
         asyncio.create_task(_regenerate_daily_plan_background())
+        
         return StoredItemResponse(
-            id=item_id,
+            id=str(item_id),
             source_type="url",
             title=item_data["title"],
             status="ready",
-            extracted_text=cleaned_text[:500],  # Preview
-            summary=item_data.get("summary"),
+            extracted_text=cleaned_text[:500],
             youtube_url=(
-                item_data.get("url")
+                str(payload.url)
                 if "youtube.com" in str(payload.url) or "youtu.be" in str(payload.url)
                 else None
             ),
         )
     except Exception as e:
-        item_data = {
-            "id": item_id,
-            "source_type": "url",
-            "title": payload.title or str(payload.url),
-            "url": str(payload.url),
-            "tags": payload.tags,
-            "status": "failed",
-            "error_message": str(e),
-            "created_at": datetime.utcnow().isoformat(),
-        }
-        STORAGE[item_id] = item_data
-        asyncio.create_task(_regenerate_daily_plan_background())
+        print(f"Error creating URL item: {e}")
         return StoredItemResponse(
-            id=item_id,
+            id="error",
             source_type="url",
-            title=item_data["title"],
+            title=payload.title or str(payload.url),
             status="failed",
             error_message=str(e),
         )
@@ -199,7 +250,9 @@ async def create_item_from_url(payload: URLItemCreate) -> StoredItemResponse:
     "/api/v1/items/local-files", response_model=StoredItemResponse, status_code=201
 )
 async def create_item_from_local_file(payload: LocalItemCreate) -> StoredItemResponse:
-    item_id = str(uuid.uuid4())
+    if not item_dao:
+        raise HTTPException(status_code=503, detail="Database not initialized")
+    
     file_path = Path(payload.file_path)
 
     if not file_path.exists():
@@ -225,19 +278,25 @@ async def create_item_from_local_file(payload: LocalItemCreate) -> StoredItemRes
 
         cleaned_text = clean_text(extracted_text)
         item_data = {
-            "id": item_id,
             "source_type": "local_file",
             "title": payload.title or file_path.name,
             "file_path": str(file_path),
+            "filename": file_path.name,
             "tags": payload.tags,
             "extracted_text": cleaned_text,
             "status": "ready",
+        }
+        item_id = await item_dao.create(item_data)
+        item_id_str = str(item_id)
+        # Actualizar STORAGE para disponibilidad inmediata en frontend
+        STORAGE[item_id_str] = {
+            "id": item_id_str,
+            **item_data,
             "created_at": datetime.utcnow().isoformat(),
         }
-        STORAGE[item_id] = item_data
         asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
-            id=item_id,
+            id=item_id_str,
             source_type="local_file",
             title=item_data["title"],
             status="ready",
@@ -245,19 +304,29 @@ async def create_item_from_local_file(payload: LocalItemCreate) -> StoredItemRes
         )
     except Exception as e:
         item_data = {
-            "id": item_id,
             "source_type": "local_file",
             "title": payload.title or file_path.name,
             "file_path": str(file_path),
+            "filename": file_path.name,
             "tags": payload.tags,
             "status": "failed",
-            "error_message": str(e),
+            "extracted_text": str(e),
+        }
+        # Intentar guardar en DB el error
+        try:
+            item_id = await item_dao.create(item_data)
+            item_id_str = str(item_id)
+        except:
+            item_id_str = str(uuid.uuid4())
+        
+        STORAGE[item_id_str] = {
+            "id": item_id_str,
+            **item_data,
             "created_at": datetime.utcnow().isoformat(),
         }
-        STORAGE[item_id] = item_data
         asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
-            id=item_id,
+            id=item_id_str,
             source_type="local_file",
             title=item_data["title"],
             status="failed",
@@ -269,7 +338,8 @@ async def create_item_from_local_file(payload: LocalItemCreate) -> StoredItemRes
 async def create_item_from_uploaded_file(
     file: UploadFile = File(...),
 ) -> StoredItemResponse:
-    item_id = str(uuid.uuid4())
+    if not item_dao:
+        raise HTTPException(status_code=503, detail="Database not initialized")
 
     try:
         content = await file.read()
@@ -293,36 +363,52 @@ async def create_item_from_uploaded_file(
 
         cleaned_text = clean_text(extracted_text)
         item_data = {
-            "id": item_id,
             "source_type": "uploaded_file",
             "title": filename,
             "filename": filename,
             "extracted_text": cleaned_text,
             "status": "ready",
+        }
+        item_id = await item_dao.create(item_data)
+        item_id_str = str(item_id)
+        # Actualizar STORAGE para disponibilidad inmediata en frontend
+        STORAGE[item_id_str] = {
+            "id": item_id_str,
+            **item_data,
             "created_at": datetime.utcnow().isoformat(),
         }
-        STORAGE[item_id] = item_data
         asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
-            id=item_id,
+            id=item_id_str,
             source_type="uploaded_file",
             title=filename,
             status="ready",
             extracted_text=cleaned_text[:500],
         )
     except Exception as e:
+        filename = file.filename or "unknown"
         item_data = {
-            "id": item_id,
             "source_type": "uploaded_file",
             "title": filename,
+            "filename": filename,
             "status": "failed",
-            "error_message": str(e),
+            "extracted_text": str(e),
+        }
+        # Intentar guardar en DB el error
+        try:
+            item_id = await item_dao.create(item_data)
+            item_id_str = str(item_id)
+        except:
+            item_id_str = str(uuid.uuid4())
+        
+        STORAGE[item_id_str] = {
+            "id": item_id_str,
+            **item_data,
             "created_at": datetime.utcnow().isoformat(),
         }
-        STORAGE[item_id] = item_data
         asyncio.create_task(_regenerate_daily_plan_background())
         return StoredItemResponse(
-            id=item_id,
+            id=item_id_str,
             source_type="uploaded_file",
             title=filename,
             status="failed",
@@ -335,21 +421,18 @@ async def list_items(
     view: FocusView = Query(default=FocusView.ALL),
     q: str | None = Query(default=None, description="Filtro textual opcional"),
 ) -> dict[str, object]:
-    items = list(STORAGE.values())
-
+    if not item_dao:
+        raise HTTPException(status_code=503, detail="Database not initialized")
+    
     if q:
-        q_lower = q.lower()
-        items = [
-            item
-            for item in items
-            if q_lower in item.get("title", "").lower()
-            or q_lower in item.get("extracted_text", "").lower()
-        ]
+        items = await item_dao.list_by_search(q)
+    else:
+        items = await item_dao.list_all()
 
     # Simplificar respuesta (sin texto completo)
     items_summary = [
         {
-            "id": item["id"],
+            "id": str(item["id"]),
             "title": item.get("title"),
             "source_type": item["source_type"],
             "status": item["status"],
@@ -367,18 +450,43 @@ async def list_items(
 
 @app.get("/api/v1/items/{item_id}")
 async def get_item(item_id: str) -> dict:
-    if item_id not in STORAGE:
+    if not item_dao:
+        raise HTTPException(status_code=503, detail="Database not initialized")
+    
+    try:
+        item_uuid = UUID(item_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid item ID format")
+    
+    item = await item_dao.get_by_id(item_uuid)
+    if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     return STORAGE[item_id]
 
 
 @app.delete("/api/v1/items/{item_id}", status_code=204)
 async def delete_item(item_id: str) -> None:
-    if item_id not in STORAGE:
+    if not item_dao or not task_dao:
+        raise HTTPException(status_code=503, detail="Database not initialized")
+    
+    try:
+        item_uuid = UUID(item_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid item ID format")
+    
+    # Delete from database
+    deleted = await item_dao.delete(item_uuid)
+    if not deleted:
         raise HTTPException(status_code=404, detail="Item not found")
-    del STORAGE[item_id]
-
-    # Eliminar tareas asociadas a este item
+    
+    # Delete associated tasks from database
+    await task_dao.delete_by_items([item_uuid])
+    
+    # Also update in-memory cache
+    if item_id in STORAGE:
+        del STORAGE[item_id]
+    
+    # Remove from persistent tasks cache
     tasks_to_remove = [
         tid
         for tid, data in PERSISTENT_TASKS.items()
@@ -386,7 +494,7 @@ async def delete_item(item_id: str) -> None:
     ]
     for tid in tasks_to_remove:
         del PERSISTENT_TASKS[tid]
-
+    
     asyncio.create_task(_regenerate_daily_plan_background())
 
 
@@ -414,36 +522,45 @@ async def generate_daily_plan() -> DailyPlanResponse:
 @app.post("/api/v1/daily-plan/tasks/{task_id}/complete", status_code=200)
 async def complete_task(task_id: str) -> dict[str, bool]:
     """Marca una tarea como completada."""
-    if task_id not in PERSISTENT_TASKS:
+    if not task_dao:
+        raise HTTPException(status_code=503, detail="Database not initialized")
+    
+    try:
+        task_uuid = UUID(task_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid task ID format")
+    
+    # Update in database
+    updated = await task_dao.update_completion(task_uuid, True)
+    if not updated:
         raise HTTPException(status_code=404, detail="Task not found")
-
-    PERSISTENT_TASKS[task_id]["completed"] = True
-
-    # Regenerar el plan si hay menos de 5 tareas activas
-    active_tasks = [t for t in PERSISTENT_TASKS.values() if not t["completed"]]
-    if len(active_tasks) < 5:
+    
+    # Also update in-memory cache
+    if task_id in PERSISTENT_TASKS:
+        PERSISTENT_TASKS[task_id]["completed"] = True
+    
+    # Regenerate plan if less than 5 active tasks
+    active_count = await task_dao.count_active()
+    if active_count < 5:
         asyncio.create_task(_regenerate_daily_plan_background())
 
     return {"completed": True}
 
 
-def _generate_daily_plan_prompt() -> str:
-    """Sintetiza un prompt con todos los elementos almacenados."""
+async def _generate_daily_plan_prompt() -> str:
+    """Sintetiza un prompt con todos los elementos almacenados desde la BD."""
+    if not item_dao:
+        return ""
+    
     items_summary = []
+    all_items = await item_dao.list_all(limit=50)
 
-    for item_id, item_data in STORAGE.items():
+    for item_data in all_items:
         source_type = item_data.get("source_type", "unknown")
-        id = item_data.get("id", "unknown_id")
         title = item_data.get("title", "Untitled")
-        tags = item_data.get("tags", [])
-        text_preview = item_data.get("extracted_text", "")[:300]
+        item_id = str(item_data.get("id", "unknown"))
 
-        item_summary = f"<id>{id}</id> [{source_type}] {title}"
-        if tags:
-            item_summary += f" (Tags: {', '.join(tags)})"
-        if text_preview:
-            item_summary += f"\n  Preview: {text_preview}..."
-
+        item_summary = f"<id>{item_id}</id> [{source_type}] {title}"
         items_summary.append(item_summary)
 
     if not items_summary:
@@ -455,7 +572,7 @@ def _generate_daily_plan_prompt() -> str:
         "CRITICAL RULES:\n"
         "1. Every task MUST explicitly reference a stored item by its title or content\n"
         "2. NO generic tasks like 'Review stored resources' or 'Work on project'\n"
-        "3. Format: [Emoji] [Action verb] <id>[item_id]</id>\n"
+        "3. Format: [Emoji] [Action verb] [item reference]\n"
         "4. Examples:\n"
         "   - ✅ '📄 Read memo_teletrabajo_2024.txt about remote work policy'\n"
         "   - ✅ '📊 Analyze Q4 2024 support incidents from incidencias_soporte_Q4_2024.csv'\n"
@@ -469,7 +586,7 @@ def _generate_daily_plan_prompt() -> str:
         "📊 Analyze Q4 2024 support incidents\n\n"
         "Generate the tasks now:"
     )
-
+    
     return prompt
 
 
