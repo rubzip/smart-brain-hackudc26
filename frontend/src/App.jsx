@@ -8,8 +8,36 @@ function App() {
     { id: 2, text: '🚿 Take a shower', completed: false },
     { id: 3, text: '💻 3 commits to an open source project', completed: false },
     { id: 4, text: '🏋️ Exercise', completed: false },
-    { id: 5, text: '👵 Call your grandma', completed: false }
+    { id: 5, text: '👵 Call grandma', completed: false }
   ])
+
+  const [selectedMood, setSelectedMood] = useState(null)
+  const [moodFeedback, setMoodFeedback] = useState(null)
+
+  const moods = [
+    { label: 'Happy', emoji: '😄', value: 'happy', color: '#f59e0b' },
+    { label: 'Angry', emoji: '😠', value: 'angry', color: '#ef4444' },
+    { label: 'Sad', emoji: '😔', value: 'sad', color: '#6366f1' },
+    { label: 'Tired', emoji: '😫', value: 'tired', color: '#8b5cf6' },
+    { label: 'Brilliant', emoji: '✨', value: 'brilliant', color: '#10b981' }
+  ]
+
+  const moodPhrases = {
+    happy: { percentage: 90, advice: "Happiness is contagious! Keep that energy and tackle your most creative tasks today. 🌟" },
+    angry: { percentage: 40, advice: "Channel that fire into your workout or a challenging problem. Take deep breaths, you've got this. 🔥" },
+    sad: { percentage: 30, advice: "It's okay to feel down. Be kind to yourself today. Maybe focus on '👵 Call your grandma' first. 🫂" },
+    tired: { percentage: 20, advice: "Your battery is low. Prioritize '🚿 Take a shower' and small wins. Rest is productive too. 🔋" },
+    brilliant: { percentage: 100, advice: "You're at your peak! Today is the day for those '💻 3 commits'. Shine bright! 💎" }
+  }
+
+  const handleMoodSubmit = () => {
+    if (selectedMood) {
+      setMoodFeedback(moodPhrases[selectedMood])
+      if (selectedMood === 'brilliant') {
+        triggerDopamine()
+      }
+    }
+  }
 
   const suggestions = [
     {
@@ -126,6 +154,44 @@ function App() {
       </header>
 
       <main className="main-area">
+        <section className="full-width-top">
+          <article className="panel mood-tracker">
+            <h2>How are you feeling right now?</h2>
+            {!moodFeedback ? (
+              <div className="mood-selection-area">
+                <div className="mood-picker">
+                  {moods.map(mood => (
+                    <button
+                      key={mood.value}
+                      className={`mood-btn ${selectedMood === mood.value ? 'active' : ''}`}
+                      onClick={() => setSelectedMood(mood.value)}
+                      title={mood.label}
+                    >
+                      <span className="mood-emoji">{mood.emoji}</span>
+                      <span className="mood-label">{mood.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="action-btn mood-submit"
+                  onClick={handleMoodSubmit}
+                  disabled={!selectedMood}
+                >
+                  Submit Mood
+                </button>
+              </div>
+            ) : (
+              <div className="mood-result-display">
+                <div className="mood-stats">
+                  <span className="mood-percent">Today you are at {moodFeedback.percentage}%</span>
+                </div>
+                <p className="mood-advice">{moodFeedback.advice}</p>
+                <button className="text-btn" onClick={() => { setMoodFeedback(null); setSelectedMood(null); }}>Reset</button>
+              </div>
+            )}
+          </article>
+        </section>
+
         <section className="left-column">
           <article className="panel dopamine-todo">
             <div className="todo-header">
