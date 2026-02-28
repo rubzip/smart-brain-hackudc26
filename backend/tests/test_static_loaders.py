@@ -40,9 +40,8 @@ def test_load_excel():
     assert "Ingeniería" in text
 
 def test_load_odt():
-    return
     """Prueba la carga de archivos ODT del directorio static."""
-    file_path = STATIC_DIR / "incidencias_soporte_Q4_2024.odt"
+    file_path = STATIC_DIR / "manual_panel_iot_v2.odt"
     assert file_path.exists()
     
     with open(file_path, "rb") as f:
