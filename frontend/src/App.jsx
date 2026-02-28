@@ -12,14 +12,12 @@ import StatsModal from './components/StatsModal'
 import ChatInterface from './components/ChatInterface'
 import AddItem from './components/AddItem'
 
+const API_BASE_URL = 'http://localhost:5000/api/v1'
+
 function App() {
-  const [tasks, setTasks] = useState([
-    { id: 1, text: '📖 Read 20 pages of Clean Code', completed: false },
-    { id: 2, text: '🚿 Take a shower', completed: false },
-    { id: 3, text: '💻 3 commits to an open source project', completed: false },
-    { id: 4, text: '🏋️ Exercise', completed: false },
-    { id: 5, text: '👵 Call grandma', completed: false }
-  ])
+  const [tasks, setTasks] = useState([])
+  const [tasksLoading, setTasksLoading] = useState(true)
+  const [tasksError, setTasksError] = useState(null)
 
   const [selectedMood, setSelectedMood] = useState(null)
   const [moodFeedback, setMoodFeedback] = useState(null)
@@ -45,6 +43,43 @@ function App() {
 
   const [accessToken, setAccessToken] = useState(null);
   const [tokenClient, setTokenClient] = useState(null);
+
+  // Fetch daily plan from backend
+  useEffect(() => {
+    const fetchDailyPlan = async () => {
+      setTasksLoading(true)
+      setTasksError(null)
+      try {
+        const response = await fetch(`${API_BASE_URL}/daily-plan`)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch daily plan: ${response.statusText}`)
+        }
+        const data = await response.json()
+        // Convert API format to component format
+        const formattedTasks = data.tasks.map(task => ({
+          id: task.id,
+          text: task.text,
+          completed: task.completed || false
+        }))
+        setTasks(formattedTasks)
+      } catch (error) {
+        console.error('Error fetching daily plan:', error)
+        setTasksError(error.message)
+        // Fallback to default tasks
+        setTasks([
+          { id: '1', text: '📖 Review stored resources', completed: false },
+          { id: '2', text: '💻 Work on project', completed: false },
+          { id: '3', text: '🏋️ Exercise', completed: false },
+        ])
+      } finally {
+        setTasksLoading(false)
+      }
+    }
+    fetchDailyPlan()
+    // Refresh daily plan every 3 seconds
+    const interval = setInterval(fetchDailyPlan, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   // IMPORTANT: Replace with your actual Google OAuth Client ID
   const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';

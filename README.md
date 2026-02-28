@@ -74,6 +74,28 @@ Para que la sincronización de eventos funcione, es necesario configurar un proy
 > [!NOTE]
 > La aplicación utiliza el flujo de **Google Identity Services (GIS)** para autenticación 100% frontend, lo que significa que no necesitas configurar un secreto de cliente ni un backend para que esto funcione localmente.
 
+## Integración Frontend-Backend
+
+El frontend está completamente conectado con el backend mediante los siguientes endpoints:
+
+### Daily Plan (Tareas Diarias)
+- **Endpoint**: `GET /api/v1/daily-plan`
+- **Descripción**: Obtiene el plan diario generado por Ollama basado en los items almacenados
+- **Funcionalidad**: Al cargar la app, el frontend obtiene automáticamente las tareas del backend cada 30 segundos
+- **Fallback**: Si el backend no está disponible, muestra tareas por defecto
+
+### Items Almacenados
+El backend mantiene una API completa para gestionar items:
+- `POST /api/v1/items/urls` - Guardar URL
+- `POST /api/v1/items/local-files` - Guardar archivo local
+- `POST /api/v1/items/files` - Subir archivo
+- `GET /api/v1/items` - Listar items
+- `GET /api/v1/items/{item_id}` - Detalle de item
+- `DELETE /api/v1/items/{item_id}` - Eliminar item
+
+> [!IMPORTANT]
+> El backend debe estar corriendo en `http://localhost:5000` para que el frontend funcione correctamente. Puedes cambiar esta URL en la variable `API_BASE_URL` en `frontend/src/App.jsx`.
+
 ### How to run
 ### Backend
 ```bash
