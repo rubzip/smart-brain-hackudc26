@@ -73,8 +73,29 @@ def get_excel_from_stream(stream: io.BytesIO) -> str:
     except Exception as e:
         raise RuntimeError(f"Error al procesar Excel: {e}") 
 
-def load_youtube() -> str:
-    pass
+import yt_dlp
+import io
+import sys
+
+def get_audio_bytes(video_id) -> bytes:
+    url = f"https://www.youtube.com/watch?v={video_id}"
+    
+    # Configuramos para capturar el flujo
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'outtmpl': '-',  # Salida a stdout
+        'logtostderr': True,
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        # En lugar de download(), usamos extract_info
+        # Pero para obtener los bytes reales de forma limpia:
+        info = ydl.extract_info(url, download=False)
+        audio_url = info['url']
+        
+        # Aquí es donde 'yt-dlp' brilla: te da la URL directa del stream
+        return audio_url # Esta URL la puedes pasar a un transcriptor directamente
 
 def load_audio() -> str:
     pass
