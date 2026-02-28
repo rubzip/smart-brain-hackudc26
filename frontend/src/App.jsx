@@ -61,7 +61,16 @@ function App() {
           text: task.text,
           completed: task.completed || false
         }))
-        setTasks(formattedTasks)
+        
+        // Merge con estado local para preservar cambios optimistas
+        setTasks(prevTasks => {
+          const merged = formattedTasks.map(serverTask => {
+            const localTask = prevTasks.find(t => t.id === serverTask.id)
+            // Si la tarea existe localmente y está completada, preservar ese estado
+            return localTask && localTask.completed ? localTask : serverTask
+          })
+          return merged
+        })
       } catch (error) {
         console.error('Error fetching daily plan:', error)
         setTasksError(error.message)
@@ -214,7 +223,7 @@ function App() {
       summary: 'A legendary masterpiece of digital culture. An essential piece of internet history that everyone should experience.'
     }
   ]
-
+  
   const [currentSuggestion, setCurrentSuggestion] = useState(0)
 
   const completedCount = tasks.filter(t => t.completed).length
@@ -226,6 +235,11 @@ function App() {
         const newStatus = !task.completed
         if (newStatus) {
           triggerDopamine()
+          // Marcar tarea como completada en el backend
+          fetch(`${API_BASE_URL}/daily-plan/tasks/${id}/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          }).catch(err => console.error('Error marking task as complete:', err))
         }
         return { ...task, completed: newStatus }
       }
