@@ -1,0 +1,91 @@
+.app-shell {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 1rem;
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: #f5f7fb;
+}
+
+.main-area {
+  display: grid;
+  grid-template-columns: minmax(320px, 40%) 1fr;
+  gap: 1rem;
+}
+
+.left-column {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 1rem;
+}
+
+.right-column {
+  min-height: 0;
+}
+
+.bottom-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #e1e7f2;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.06);
+}
+
+.panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.panel ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.panel li {
+  margin: 0.35rem 0;
+}
+
+.chat-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chat-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #c7d2e6;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+@media (max-width: 900px) {
+  .main-area,
+  .bottom-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .left-column {
+    grid-template-rows: auto;
+  }
+}
