@@ -1,20 +1,17 @@
 import asyncio
-import io
-import json
 import uuid
 from datetime import datetime
-from enum import Enum
 from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, HttpUrl
 
 from models import (
     DailyPlanResponse, DailyTask,
     SentimentCreate, SentimentResponse,
     URLItemCreate, StoredItemResponse,
+    LocalItemCreate, FocusView
     )
 
 

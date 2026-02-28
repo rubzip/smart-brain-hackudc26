@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
-from pydantic import BaseModel, Field, Enum
-from fastapi import HttpUrl
+from enum import Enum
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class FocusView(str, Enum):
