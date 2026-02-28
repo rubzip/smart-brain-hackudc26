@@ -60,47 +60,64 @@ const App = () => {
     };
 
     return (
-        <div className="container">
-            <header>
-                <div className="icon-wrapper">🧠</div>
-                <h1>Smart Brain</h1>
+        <div className="add-item-panel extension-container">
+            <header className="add-item-header">
+                <div className="header-top">
+                    <div className="brain-icon">🧠</div>
+                    <h2>Smart Brain</h2>
+                </div>
             </header>
 
-            <div className="section">
-                <div className="page-details">
-                    <div className="title-field">{pageInfo.title || 'Untitled'}</div>
-                    <div className="url-field">{pageInfo.url}</div>
+            <div className="add-item-body">
+                <div className="input-section">
+                    <div className="input-group-premium">
+                        <label>Title</label>
+                        <input
+                            type="text"
+                            placeholder="Title"
+                            value={pageInfo.title}
+                            onChange={(e) => setPageInfo({ ...pageInfo, title: e.target.value })}
+                        />
+                    </div>
+                    <div className="input-group-premium">
+                        <label>URL</label>
+                        <input
+                            type="url"
+                            placeholder="URL"
+                            value={pageInfo.url}
+                            onChange={(e) => setPageInfo({ ...pageInfo, url: e.target.value })}
+                        />
+                    </div>
                 </div>
-            </div>
 
-            <div className="section">
-                <div className="section-label">Category</div>
-                <div className="category-list">
-                    {categories.map((cat) => (
-                        <div
-                            key={cat.id}
-                            className={`category-item ${category === cat.id ? 'selected' : ''}`}
-                            onClick={() => setCategory(cat.id)}
-                        >
-                            <span className="emoji">{cat.emoji}</span>
-                            <span className="label">{cat.label}</span>
-                            {category === cat.id && <span className="check">✓</span>}
-                        </div>
-                    ))}
+                <div className="category-section-premium">
+                    <label className="section-label-tiny">Category</label>
+                    <div className="category-list-vertical">
+                        {categories.map((cat) => (
+                            <div
+                                key={cat.id}
+                                className={`category-row-item ${category === cat.id ? 'selected' : ''}`}
+                                onClick={() => setCategory(cat.id)}
+                            >
+                                <span className="cat-emoji">{cat.emoji}</span>
+                                <span className="cat-label-text">{cat.label}</span>
+                                {category === cat.id && <span className="cat-checkmark">✓</span>}
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            <footer className="footer-actions">
-                <button
-                    className={`save-btn ${status === 'saving' ? 'loading' : ''}`}
-                    onClick={handleSave}
-                    disabled={status === 'saving'}
-                >
-                    {status === 'saving' ? 'Saving...' : status === 'success' ? 'Added to Brain' : 'Save to Brain'}
-                </button>
-                {status === 'error' && <div className="status-msg error">Failed to save</div>}
-                {status === 'success' && <div className="status-msg success">Saved to database!</div>}
-            </footer>
+                <footer className="add-item-footer">
+                    <button
+                        className={`save-brain-btn ${status === 'saving' ? 'loading' : ''} ${status === 'success' ? 'success' : ''}`}
+                        onClick={handleSave}
+                        disabled={status === 'saving'}
+                    >
+                        {status === 'saving' ? 'Saving...' : status === 'success' ? 'Saved Successfully!' : 'Save to Brain'}
+                    </button>
+                    {status === 'error' && <p className="error-text-mini">Failed to save. Try again.</p>}
+                </footer>
+            </div>
         </div>
     );
 };

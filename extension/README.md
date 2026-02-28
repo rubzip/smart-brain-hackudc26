@@ -9,7 +9,7 @@ Follow these steps to activate the extension in your browser:
 ### 1. Build the Project
 Make sure you have dependencies installed and run the build command:
 ```bash
-cd chrome-extension
+cd extension
 npm install
 npm run build
 ```
