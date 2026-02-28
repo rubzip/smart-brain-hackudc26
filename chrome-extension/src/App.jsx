@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
+// Cross-browser compatibility: Firefox uses 'browser' API, Chrome uses 'chrome' API
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 const App = () => {
     const [pageInfo, setPageInfo] = useState({ title: '', url: '' });
     const [category, setCategory] = useState('Work');
@@ -12,14 +15,17 @@ const App = () => {
     ];
 
     useEffect(() => {
-        // Get current tab info
-        if (typeof chrome !== 'undefined' && chrome.tabs) {
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        // Get current tab info (works in both Chrome and Firefox)
+        if (browserAPI && browserAPI.tabs) {
+            browserAPI.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
                 const activeTab = tabs[0];
                 setPageInfo({
                     title: activeTab.title || '',
                     url: activeTab.url || ''
                 });
+            }).catch(() => {
+                // Fallback for development or errors
+                setPageInfo({ title: 'Mock Page', url: 'https://example.com' });
             });
         } else {
             // Mock for development

@@ -1,6 +1,6 @@
 # 🧠 Smart Brain Link Saver
 
-A minimalist Chrome extension to quickly categorize and save links.
+A minimalist cross-browser extension to quickly categorize and save links. Works on **Chrome** and **Firefox**.
 
 ## 🚀 Setup & Installation
 
@@ -19,6 +19,11 @@ npm run build
 2. Toggle **Developer mode** (switch in the top right corner) to **ON**.
 3. Click the **Load unpacked** button.
 4. Select the **`chrome-extension/dist`** folder that was generated in the previous step.
+
+### 2. Load into Firefox
+1. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on...**.
+3. Navigate to the **`chrome-extension/dist`** folder and select the **`manifest.json`** file.
 
 ---
 
