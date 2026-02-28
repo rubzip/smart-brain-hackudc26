@@ -6,7 +6,7 @@ python-docx
 odfpy
 pandas
 openpyxl
-fastapi
+fastapi[standard]
 uvicorn
 python-multipart
 ollama

@@ -127,10 +127,21 @@ function App() {
     sad: "It's okay to feel down. Be kind to yourself. Focus on small wins today. 🫂"
   }
 
-  const handleMoodSubmit = (moodValue) => {
+  const handleMoodSubmit = async (moodValue) => {
     setSelectedMood(moodValue);
     setMoodFeedback(moodPhrases[moodValue]);
     if (moodValue === 'happy') triggerDopamine();
+
+    // Persist sentiment to backend
+    try {
+      await fetch('http://localhost:8000/api/v1/sentiments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sentiment: moodValue }),
+      });
+    } catch (error) {
+      console.error('Error recording sentiment:', error);
+    }
 
     // Auto-hide feedback after 5 seconds
     setTimeout(() => {

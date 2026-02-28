@@ -24,6 +24,7 @@ from utils.loader import (
     get_pdf_from_stream,
     get_webpage_text,
 )
+from models import SentimentCreate, SentimentResponse
 
 
 class FocusView(str, Enum):
@@ -100,6 +101,7 @@ app.add_middleware(
 
 # Storage in-memory (sustituir por DB en producción)
 STORAGE: dict[str, dict] = {}
+SENTIMENTS_STORAGE: list[dict] = []
 
 # Caching system for daily plan
 DAILY_PLAN_CACHE: DailyPlanResponse | None = None
@@ -234,7 +236,7 @@ async def create_item_from_local_file(payload: LocalItemCreate) -> StoredItemRes
             extracted_text = stream.read().decode("utf-8")
         else:
             raise ValueError(f"Unsupported file type: {suffix}")
-        
+
         item_data = {
             "id": item_id,
             "source_type": "local_file",
@@ -448,6 +450,23 @@ def _generate_daily_plan_prompt() -> str:
     )
     
     return prompt
+
+
+@app.post("/api/v1/sentiments", response_model=SentimentResponse, status_code=201)
+async def record_sentiment(payload: SentimentCreate) -> SentimentResponse:
+    """Registra el sentimiento/humor del usuario."""
+    sentiment_data = {
+        "sentiment": payload.sentiment,
+        "generated_at": datetime.utcnow()
+    }
+    SENTIMENTS_STORAGE.append(sentiment_data)
+    return SentimentResponse(**sentiment_data)
+
+
+@app.get("/api/v1/sentiments")
+async def list_sentiments() -> list[dict]:
+    """Lista el historial de sentimientos registrados."""
+    return SENTIMENTS_STORAGE
 
 
 async def _call_ollama_for_plan(prompt: str) -> list[DailyTask] | None:
