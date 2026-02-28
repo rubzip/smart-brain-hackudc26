@@ -15,25 +15,21 @@ function App() {
   const [moodFeedback, setMoodFeedback] = useState(null)
 
   const moods = [
-    { label: 'Happy', emoji: '😄', value: 'happy', color: '#f59e0b' },
-    { label: 'Angry', emoji: '😠', value: 'angry', color: '#ef4444' },
-    { label: 'Sad', emoji: '😔', value: 'sad', color: '#6366f1' },
-    { label: 'Tired', emoji: '😫', value: 'tired', color: '#8b5cf6' },
-    { label: 'Brilliant', emoji: '✨', value: 'brilliant', color: '#10b981' }
+    { label: 'Happy', emoji: '😄', value: 'happy' },
+    { label: 'Tired', emoji: '🫩', value: 'tired' },
+    { label: 'Sad', emoji: '😔', value: 'sad' }
   ]
 
   const moodPhrases = {
-    happy: { percentage: 90, advice: "Happiness is contagious! Keep that energy and tackle your most creative tasks today. 🌟" },
-    angry: { percentage: 40, advice: "Channel that fire into your workout or a challenging problem. Take deep breaths, you've got this. 🔥" },
-    sad: { percentage: 30, advice: "It's okay to feel down. Be kind to yourself today. Maybe focus on '👵 Call your grandma' first. 🫂" },
-    tired: { percentage: 20, advice: "Your battery is low. Prioritize '🚿 Take a shower' and small wins. Rest is productive too. 🔋" },
-    brilliant: { percentage: 100, advice: "You're at your peak! Today is the day for those '💻 3 commits'. Shine bright! 💎" }
+    happy: "Happiness is contagious! Keep that energy and tackle your most creative tasks today. 🌟",
+    tired: "You're not alone. Take a break and recharge. 😴",
+    sad: "It's okay to feel down. Be kind to yourself. Focus on small wins today. 🫂"
   }
 
   const handleMoodSubmit = () => {
     if (selectedMood) {
       setMoodFeedback(moodPhrases[selectedMood])
-      if (selectedMood === 'brilliant') {
+      if (selectedMood === 'happy') {
         triggerDopamine()
       }
     }
@@ -154,42 +150,41 @@ function App() {
       </header>
 
       <main className="main-area">
-        <section className="full-width-top">
-          <article className="panel mood-tracker">
-            <h2>How are you feeling right now?</h2>
+        <section className="mood-dynamic-island-container">
+          <div className={`dynamic-island ${moodFeedback ? 'expanded' : ''}`}>
             {!moodFeedback ? (
-              <div className="mood-selection-area">
-                <div className="mood-picker">
+              <div className="island-grid">
+                <span className="island-title">How are you?</span>
+                <div className="island-moods">
                   {moods.map(mood => (
                     <button
                       key={mood.value}
-                      className={`mood-btn ${selectedMood === mood.value ? 'active' : ''}`}
-                      onClick={() => setSelectedMood(mood.value)}
-                      title={mood.label}
+                      className={`island-mood-btn ${selectedMood === mood.value ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedMood(mood.value);
+                        // Auto submit for even less interaction
+                        const phrases = {
+                          happy: "Happiness is contagious! Keep that energy! 🌟",
+                          angry: "Channel that fire into a challenge. Deep breaths. 🔥",
+                          sad: "It's okay to feel down. Focus on small wins. 🫂"
+                        };
+                        setMoodFeedback(phrases[mood.value]);
+                        if (mood.value === 'happy') triggerDopamine();
+                      }}
                     >
                       <span className="mood-emoji">{mood.emoji}</span>
                       <span className="mood-label">{mood.label}</span>
                     </button>
                   ))}
                 </div>
-                <button
-                  className="action-btn mood-submit"
-                  onClick={handleMoodSubmit}
-                  disabled={!selectedMood}
-                >
-                  Submit Mood
-                </button>
               </div>
             ) : (
-              <div className="mood-result-display">
-                <div className="mood-stats">
-                  <span className="mood-percent">Today you are at {moodFeedback.percentage}%</span>
-                </div>
-                <p className="mood-advice">{moodFeedback.advice}</p>
-                <button className="text-btn" onClick={() => { setMoodFeedback(null); setSelectedMood(null); }}>Reset</button>
+              <div className="island-feedback">
+                <span className="island-message">{moodFeedback}</span>
+                <button className="island-close" onClick={() => { setMoodFeedback(null); setSelectedMood(null); }}>✕</button>
               </div>
             )}
-          </article>
+          </div>
         </section>
 
         <section className="left-column">
