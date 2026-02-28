@@ -8,4 +8,27 @@ Entre las multiples funcionalidades que ofrece el Smart Brain, destacan:
  * Trackeo de propósitos diarios. Establece unos propósitos diarios y Smart Brain te ayudara a alcanzarlos.
  * Trackeo de emociones.
  * Recordatorio de tareas.
- 
+
+## Stack Tecnologico
+ * Frontend: React, Vite
+ * Backend: FastAPI, Postgres, 
+ * LLMs: 
+
+## How to run
+### Backend
+```bash
+cd backend
+```
+
+```bash
+make setup && make install
+source .venv/bin/activate
+```
+
+```bash
+make run
+```
+
+### Frontend
+
+### Extension
