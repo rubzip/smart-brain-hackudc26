@@ -41,6 +41,8 @@ class StoredItemResponse(BaseModel):
     title: str | None = None
     status: Literal["pending", "ready", "failed"] = "pending"
     extracted_text: str | None = None
+    summary: str | None = None
+    youtube_url: str | None = None
     error_message: str | None = None
 
 
@@ -107,6 +109,8 @@ async def create_item_from_url(payload: URLItemCreate) -> StoredItemResponse:
             title=item_data["title"],
             status="ready",
             extracted_text=extracted_text[:500],  # Preview
+            summary=item_data.get("summary"),
+            youtube_url=item_data.get("url") if "youtube.com" in str(payload.url) or "youtu.be" in str(payload.url) else None,
         )
     except Exception as e:
         item_data = {
