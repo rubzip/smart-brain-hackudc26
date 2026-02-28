@@ -3,12 +3,7 @@ import React from 'react';
 const Footer = ({ onChatClick }) => {
     return (
         <footer className="bottom-bar">
-            <section className="panel bottom-item" id="add-item-panel">
-                <h2>Add new thing</h2>
-                <button type="button" className="action-btn">+ New item</button>
-            </section>
-
-            <section className="panel bottom-item" id="chat-panel">
+            <section className="panel bottom-item full-width-footer" id="chat-panel">
                 <h2>Ask your Brain</h2>
                 <div className="chat-row">
                     <button

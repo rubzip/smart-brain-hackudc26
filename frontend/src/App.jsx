@@ -10,6 +10,7 @@ import Footer from './components/Footer'
 import MoodDock from './components/MoodDock'
 import StatsModal from './components/StatsModal'
 import ChatInterface from './components/ChatInterface'
+import AddItem from './components/AddItem'
 
 function App() {
   const [tasks, setTasks] = useState([
@@ -266,15 +267,19 @@ function App() {
             schedule={schedule}
             upNext={upNext}
           />
+
+          <AddItem />
         </section>
 
-        <Suggestions
-          suggestions={suggestions}
-          currentSuggestion={currentSuggestion}
-          prevSuggestion={prevSuggestion}
-          nextSuggestion={nextSuggestion}
-          setCurrentSuggestion={setCurrentSuggestion}
-        />
+        <div className="right-column">
+          <Suggestions
+            suggestions={suggestions}
+            currentSuggestion={currentSuggestion}
+            prevSuggestion={prevSuggestion}
+            nextSuggestion={nextSuggestion}
+            setCurrentSuggestion={setCurrentSuggestion}
+          />
+        </div>
       </main>
 
       <Footer onChatClick={() => setIsChatOpen(true)} />
