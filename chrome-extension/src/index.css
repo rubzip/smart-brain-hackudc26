@@ -1,0 +1,166 @@
+:root {
+  --bg-color: #ffffff;
+  --text-main: #37352f;
+  --text-muted: #787774;
+  --bg-hover: #f1f1f0;
+  --bg-selected: #ebeaea;
+  --border-color: #e9e9e8;
+  --accent: #2383e2;
+  --success: #0b6e4f;
+  --error: #df512a;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  background: var(--bg-color);
+  color: var(--text-main);
+  width: 300px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  padding: 12px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.icon-wrapper {
+  font-size: 20px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.section {
+  margin-bottom: 16px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  padding: 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.page-details {
+  background: var(--bg-hover);
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.title-field {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.url-field {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 150ms ease;
+  font-size: 13px;
+}
+
+.category-item:hover {
+  background: var(--bg-hover);
+}
+
+.category-item.selected {
+  background: var(--bg-selected);
+}
+
+.emoji {
+  font-size: 16px;
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+}
+
+.label {
+  flex-grow: 1;
+}
+
+.check {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.footer-actions {
+  margin-top: 24px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+
+.save-btn {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.save-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.save-btn:disabled {
+  background: var(--bg-selected);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.status-msg {
+  font-size: 11px;
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.status-msg.success {
+  color: var(--success);
+}
+
+.status-msg.error {
+  color: var(--error);
+}
