@@ -116,44 +116,21 @@ body {
 
 .main-area {
   display: grid;
-  grid-template-columns: repeat(2, minmax(300px, 1fr)) 1.4fr;
-  gap: 2.5rem;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 3rem;
   align-items: start;
 }
 
-@media (max-width: 1300px) {
-  .main-area {
-    grid-template-columns: 1fr 1.2fr;
-    grid-template-areas:
-      "goals suggestions"
-      "pending suggestions";
-    gap: 2rem;
-  }
-
-  .column-goals {
-    grid-area: goals;
-  }
-
-  .column-pending {
-    grid-area: pending;
-  }
-
-  .column-suggestions {
-    grid-area: suggestions;
-  }
+.main-column-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .main-area {
     grid-template-columns: 1fr;
-    grid-template-areas: none;
-    gap: 2rem;
-  }
-
-  .column-goals,
-  .column-pending,
-  .column-suggestions {
-    grid-area: auto;
+    gap: 2.5rem;
   }
 }
 
@@ -904,16 +881,23 @@ body {
   min-height: 500px;
 }
 
-/* Floating Mood Dock (Dynamic Island 2.0) */
+.column-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  position: relative;
+}
+
+/* Floating Mood Dock (Relative to column) */
 .mood-dock-container {
-  position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  position: sticky;
+  bottom: 0px;
   z-index: 1000;
   display: flex;
   justify-content: center;
+  width: 100%;
   pointer-events: none;
+  margin-top: 1rem;
 }
 
 .mood-dock {
@@ -1140,8 +1124,8 @@ body {
 
 .carousel-track {
   position: relative;
-  height: 560px;
-  /* Increased to accommodate content */
+  height: 620px;
+  /* Increased to accommodate content in wider layout */
   flex-grow: 1;
 }
 
@@ -1286,12 +1270,12 @@ body {
   background: var(--primary);
   color: white;
   text-decoration: none;
-  padding: 0.9rem;
-  /* Slightly reduced */
+  padding: 0.8rem;
+  /* Slightly more compact */
   border-radius: 16px;
   font-weight: 700;
-  margin-top: 1.25rem;
-  /* Slightly reduced */
+  margin-top: 1rem;
+  /* Reduced gap */
   transition: all 0.3s;
 }
 

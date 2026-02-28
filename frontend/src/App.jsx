@@ -371,24 +371,26 @@ function App() {
       />
 
       <main className="main-area">
-        <section className="column-goals">
-          <TodoList
-            tasks={tasks}
-            completedCount={completedCount}
-            progress={progress}
-            toggleTask={toggleTask}
-            showDelayedSpinner={showDailyGoalsSpinner && tasksLoading}
-          />
-        </section>
+        <div className="main-column-left">
+          <section className="column-goals">
+            <TodoList
+              tasks={tasks}
+              completedCount={completedCount}
+              progress={progress}
+              toggleTask={toggleTask}
+              showDelayedSpinner={showDailyGoalsSpinner && tasksLoading}
+            />
+          </section>
 
-        <section className="column-pending">
-          <Schedule
-            accessToken={accessToken}
-            handleAuthClick={handleAuthClick}
-            schedule={schedule}
-            upNext={upNext}
-          />
-        </section>
+          <section className="column-pending">
+            <Schedule
+              accessToken={accessToken}
+              handleAuthClick={handleAuthClick}
+              schedule={schedule}
+              upNext={upNext}
+            />
+          </section>
+        </div>
 
         <section className="column-suggestions">
           {isSearching && searchResults.length === 0 ? (
@@ -407,6 +409,15 @@ function App() {
               setCurrentSuggestion={setCurrentSuggestion}
             />
           )}
+
+          <MoodDock
+            moodFeedback={moodFeedback}
+            moods={moods}
+            handleMoodSubmit={handleMoodSubmit}
+            setIsStatsOpen={setIsStatsOpen}
+            setMoodFeedback={setMoodFeedback}
+            setSelectedMood={setSelectedMood}
+          />
         </section>
       </main>
 
@@ -427,14 +438,6 @@ function App() {
         onClose={closeChat}
       />
 
-      <MoodDock
-        moodFeedback={moodFeedback}
-        moods={moods}
-        handleMoodSubmit={handleMoodSubmit}
-        setIsStatsOpen={setIsStatsOpen}
-        setMoodFeedback={setMoodFeedback}
-        setSelectedMood={setSelectedMood}
-      />
 
       <StatsModal
         isStatsOpen={isStatsOpen}
