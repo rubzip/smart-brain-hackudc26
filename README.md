@@ -46,7 +46,35 @@ Hemos utilizado una metodologia TDD para el desarrollo de la aplicacion. Todas l
  * Video / audio ????
  * YouTube ??? 
 
-## How to run
+## Configuración de Google Calendar
+
+Para que la sincronización de eventos funcione, es necesario configurar un proyecto en Google Cloud. Sigue estos pasos detallados:
+
+1.  **Crear Proyecto**: Ve a [Google Cloud Console](https://console.cloud.google.com/) y crea un nuevo proyecto llamado `Smart Brain`.
+2.  **Habilitar API**:
+    *   En el buscador superior, escribe "Google Calendar API".
+    *   Seleccion de la API y haz clic en **Habilitar**.
+3.  **Configurar Pantalla de Consentimiento (OAuth Consent Screen)**:
+    *   Ve a "API y servicios" > "Pantalla de consentimiento de OAuth".
+    *   Selecciona "External" (si es para uso general) o "Internal" (si estás en una organización).
+    *   Rellena los campos obligatorios (Nombre de la app, email de soporte).
+    *   **Scopes**: Añade el scope `./auth/calendar.readonly`.
+4.  **Crear Credenciales**:
+    *   Ve a la pestaña "Credenciales".
+    *   Haz clic en "Crear credenciales" > "ID de cliente de OAuth".
+    *   **Tipo de aplicación**: Aplicación web.
+    *   **Orígenes de JavaScript autorizados**: Añade `http://localhost:5175`.
+5.  **Actualizar el Código**:
+    *   Copia el **Client ID** generado.
+    *   Pégalo en el archivo `frontend/src/App.jsx` en la constante `CLIENT_ID`:
+      ```javascript
+      const CLIENT_ID = 'TU_ID_AQUÍ.apps.googleusercontent.com';
+      ```
+
+> [!NOTE]
+> La aplicación utiliza el flujo de **Google Identity Services (GIS)** para autenticación 100% frontend, lo que significa que no necesitas configurar un secreto de cliente ni un backend para que esto funcione localmente.
+
+### How to run
 ### Backend
 ```bash
 cd backend
@@ -62,5 +90,11 @@ make run
 ```
 
 ### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ### Extension
+Carga la carpeta `extension` como una "Unpacked Extension" en `chrome://extensions/`.
