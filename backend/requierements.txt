@@ -4,3 +4,5 @@ requests
 bs4
 python-docx
 odfpy
+pandas
+openpyxl

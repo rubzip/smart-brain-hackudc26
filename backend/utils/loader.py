@@ -2,6 +2,8 @@ import requests
 import io 
 from bs4 import BeautifulSoup
 import fitz  # PyMuPDF
+import pandas as pd
+
 
 def get_pdf_from_stream(stream: io.BytesIO) -> str:
     try:
@@ -63,9 +65,13 @@ def get_odt_from_stream(stream: io.BytesIO) -> str:
         raise RuntimeError(f"Error al procesar ODT: {e}")
 
 
-def load_file() -> str:
-    pass
-
+def get_excel_from_stream(stream: io.BytesIO) -> str:
+    try:
+        stream.seek(0)
+        df = pd.read_excel(stream)
+        return df.to_string()
+    except Exception as e:
+        raise RuntimeError(f"Error al procesar Excel: {e}") 
 
 def load_youtube() -> str:
     pass
