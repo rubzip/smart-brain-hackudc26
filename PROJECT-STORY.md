@@ -1,5 +1,6 @@
 ## Inspiration
 
+
 ## What it does
 Web app and navigator extension.
 Stores content that you don't have time to read.
@@ -19,11 +20,10 @@ Semantic search of stored content.
  * LLM assistant: Google Antigravity, VSCode Copilot.
 
 ## Challenges we ran into
-Correr LLMs en local para resolver los problemas de manera eficiente y correcta.
-Correr un modelo Speech2Text en local, por problemas de compatibilidad de drivers y coste computacional.
-Orquestación de un proyecto full stack.
-Diseño de una interface de usuario intuitiva y agradable.
-
+Running LLMs in local, solving problems efficiently and correctly.
+Running a Speech2Text model in local, due to driver compatibility problems and computational cost.
+Orchestration of a full stack project.
+Designing an intuitive and pleasant user interface.
 
 ## Accomplishments that we're proud of
 
