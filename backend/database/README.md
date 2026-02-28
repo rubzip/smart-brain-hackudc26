@@ -1,6 +1,54 @@
 # Database Setup
 
-## PostgreSQL con pgvector
+## PostgreSQL con pgvector usando Docker (Recomendado)
+
+### Inicio rápido
+
+Desde la raíz del proyecto:
+
+```bash
+# Iniciar PostgreSQL con pgvector
+docker-compose up -d
+
+# Verificar que está corriendo
+docker-compose ps
+
+# Ver logs
+docker-compose logs -f postgres
+```
+
+El schema `init.sql` se aplica automáticamente al iniciar.
+
+### Variables de entorno
+
+Crear archivo `.env` en la raíz del backend:
+
+```env
+DATABASE_URL=postgresql://smartbrain_user:smartbrain_dev_password@localhost:5432/smartbrain
+```
+
+### Comandos útiles
+
+```bash
+# Parar la base de datos
+docker-compose down
+
+# Parar y borrar datos (reset completo)
+docker-compose down -v
+
+# Conectarse con psql
+docker exec -it smartbrain-postgres psql -U smartbrain_user -d smartbrain
+
+# Ejecutar SQL
+docker exec -i smartbrain-postgres psql -U smartbrain_user -d smartbrain < backend/schemas/migrations/nueva_migracion.sql
+```
+
+---
+
+## Instalación manual (Alternativa)
+
+<details>
+<summary>Click para ver instrucciones de instalación manual</summary>
 
 ### Instalación de PostgreSQL y pgvector
 
@@ -36,13 +84,7 @@ GRANT ALL PRIVILEGES ON DATABASE smartbrain TO smartbrain_user;
 psql -U smartbrain_user -d smartbrain -f schemas/init.sql
 ```
 
-### Variables de entorno
-
-Crear archivo `.env` en la raíz del backend:
-
-```env
-DATABASE_URL=postgresql://smartbrain_user:your_password@localhost:5432/smartbrain
-```
+</details>
 
 ### Dependencias Python
 
