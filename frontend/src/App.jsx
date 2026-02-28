@@ -12,11 +12,40 @@ function App() {
   ])
 
   const suggestions = [
-    { id: 1, type: 'Article', title: 'Building better prompts', icon: '📝' },
-    { id: 2, type: 'Video', title: 'React state patterns', icon: '🎥' },
-    { id: 3, type: 'Paper', title: 'Retrieval-augmented systems', icon: '📄' },
-    { id: 4, type: 'Talk', title: 'Productive dev workflows', icon: '🎤' }
+    {
+      id: 1,
+      type: 'Video',
+      title: 'Clean Code - Uncle Bob',
+      icon: '🎥',
+      url: 'https://www.youtube.com/watch?v=7EmboKQH8lM',
+      youtube_url: 'https://www.youtube.com/watch?v=7EmboKQH8lM',
+      summary: 'A deep dive into the principles of writing clean, maintainable code by Robert C. Martin. Essential for professional developers.'
+    },
+    {
+      id: 2,
+      type: 'Article',
+      title: 'The MIT License',
+      icon: '📝',
+      url: 'https://opensource.org/license/mit',
+      summary: 'A short and simple permissive software license with very few restrictions. Perfect for open source projects.'
+    },
+    {
+      id: 3,
+      type: 'Video',
+      title: 'Never Gonna Give You Up',
+      icon: '🎥',
+      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      summary: 'A legendary masterpiece of digital culture. An essential piece of internet history that everyone should experience.'
+    }
   ]
+
+  const getYoutubeId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
 
   const [currentSuggestion, setCurrentSuggestion] = useState(0)
 
@@ -140,22 +169,53 @@ function App() {
 
         <section className="panel right-column suggestion-carousel-panel">
           <h2>Your Brain Suggestions</h2>
+          <p className="section-description">Your content recommendations for today</p>
           <div className="carousel-container">
             <button className="carousel-btn prev" onClick={prevSuggestion}>←</button>
 
             <div className="carousel-track">
-              {suggestions.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`suggestion-card ${index === currentSuggestion ? 'active' : ''}`}
-                  style={{ transform: `translateX(${(index - currentSuggestion) * 105}%)` }}
-                >
-                  <div className="card-icon">{item.icon}</div>
-                  <div className="card-tag">{item.type}</div>
-                  <h3 className="card-title">{item.title}</h3>
-                  <button className="open-btn">View content</button>
-                </div>
-              ))}
+              {suggestions.map((item, index) => {
+                const youtubeId = getYoutubeId(item.youtube_url);
+                return (
+                  <div
+                    key={item.id}
+                    className={`suggestion-card ${index === currentSuggestion ? 'active' : ''}`}
+                    style={{ transform: `translateX(${(index - currentSuggestion) * 105}%)` }}
+                  >
+                    <div className="card-content-wrapper">
+                      {youtubeId ? (
+                        <div className="video-embed">
+                          <iframe
+                            width="100%"
+                            height="180"
+                            src={`https://www.youtube.com/embed/${youtubeId}`}
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                        </div>
+                      ) : (
+                        <div className="card-icon-container">
+                          <span className="card-icon-large">{item.icon}</span>
+                        </div>
+                      )}
+                      <div className="card-details">
+                        <div className="card-tag">{item.type}</div>
+                        <h3 className="card-title">
+                          <a href={item.url} target="_blank" rel="noopener noreferrer">
+                            {item.title}
+                          </a>
+                        </h3>
+                        {item.summary && <p className="card-summary">{item.summary}</p>}
+                      </div>
+                    </div>
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="open-btn-link">
+                      View full content
+                    </a>
+                  </div>
+                );
+              })}
             </div>
 
             <button className="carousel-btn next" onClick={nextSuggestion}>→</button>
