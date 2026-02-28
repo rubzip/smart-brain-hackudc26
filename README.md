@@ -120,3 +120,8 @@ npm run dev
 
 ### Extension
 Carga la carpeta `extension` como una "Unpacked Extension" en `chrome://extensions/`.
+
+# Licensing
+This project is licensed under the XXX License - see the [LICENSE](LICENSE) file for details.
+
+The reason, ...

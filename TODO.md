@@ -11,4 +11,7 @@
 - [ ] Unificar interfaces webapp y extension
 - [ ] Documentar tecnologías y arquitectura
 - [ ] RAG
+- [ ] Forzar el deploy de la API con un puerto concreto.
+- [ ] 
+
 

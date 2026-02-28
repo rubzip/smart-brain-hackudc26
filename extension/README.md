@@ -18,12 +18,12 @@ npm run build
 1. Open Google Chrome and go to `chrome://extensions/`.
 2. Toggle **Developer mode** (switch in the top right corner) to **ON**.
 3. Click the **Load unpacked** button.
-4. Select the **`chrome-extension/dist`** folder that was generated in the previous step.
+4. Select the **`extension/dist`** folder that was generated in the previous step.
 
 ### 2. Load into Firefox
 1. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on...**.
-3. Navigate to the **`chrome-extension/dist`** folder and select the **`manifest.json`** file.
+3. Navigate to the **`extension/dist`** folder and select the **`manifest.json`** file.
 
 ---
 
@@ -42,6 +42,3 @@ If you want to modify the design or functionality:
 1. Edit files in `src/`.
 2. Run `npm run build` to update the `dist` folder.
 3. Go to `chrome://extensions/` and click the **Update** icon (circular arrow) on the extension card.
-
----
-*HackUDC 2026 - Smart Brain*

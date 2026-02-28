@@ -11,6 +11,7 @@ import MoodDock from './components/MoodDock'
 import StatsModal from './components/StatsModal'
 import ChatInterface from './components/ChatInterface'
 import AddItem from './components/AddItem'
+import SearchTool from './components/SearchTool'
 
 const API_BASE_URL = 'http://localhost:5000/api/v1'
 
@@ -23,6 +24,9 @@ function App() {
   const [moodFeedback, setMoodFeedback] = useState(null)
   const [isStatsOpen, setIsStatsOpen] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
+
+  const [searchResults, setSearchResults] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
 
   const weeklyData = [
     { day: 'Mon', completion: 65 },
@@ -289,6 +293,36 @@ function App() {
     }
   }, [completedCount, tasks.length])
 
+  const handleGlobalSearch = async ({ query, tags }) => {
+    setIsSearching(true);
+    try {
+      const tagParams = tags.length > 0 ? `&tags=${tags.join(',')}` : '';
+      const response = await fetch(`http://localhost:8000/api/v1/items?q=${query}${tagParams}`);
+      const data = await response.json();
+
+      const mappedResults = (data.items || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        type: item.source_type === 'url' ? 'Video/Web' : 'File',
+        icon: item.source_type === 'url' ? '🎥' : '📄',
+        url: item.url,
+        youtube_url: item.youtube_url,
+        summary: item.summary || 'No summary available.'
+      }));
+
+      setSearchResults(mappedResults);
+      setCurrentSuggestion(0);
+    } catch (error) {
+      console.error('Search failed:', error);
+    }
+  };
+
+  const clearSearch = () => {
+    setIsSearching(false);
+    setSearchResults([]);
+    setCurrentSuggestion(0);
+  };
+
   const nextSuggestion = () => {
     setCurrentSuggestion((prev) => (prev + 1) % suggestions.length)
   }
@@ -318,16 +352,30 @@ function App() {
           />
 
           <AddItem />
+
+          <SearchTool
+            onSearch={handleGlobalSearch}
+            onClear={clearSearch}
+          />
         </section>
 
         <div className="right-column">
-          <Suggestions
-            suggestions={suggestions}
-            currentSuggestion={currentSuggestion}
-            prevSuggestion={prevSuggestion}
-            nextSuggestion={nextSuggestion}
-            setCurrentSuggestion={setCurrentSuggestion}
-          />
+          {isSearching && searchResults.length === 0 ? (
+            <div className="panel search-no-results">
+              <span className="no-results-emoji">🤷‍♂️</span>
+              <h3>No results found</h3>
+              <p>Try different keywords or tags</p>
+              <button className="premium-btn" onClick={clearSearch}>Return to suggestions</button>
+            </div>
+          ) : (
+            <Suggestions
+              suggestions={isSearching ? searchResults : suggestions}
+              currentSuggestion={currentSuggestion}
+              prevSuggestion={prevSuggestion}
+              nextSuggestion={nextSuggestion}
+              setCurrentSuggestion={setCurrentSuggestion}
+            />
+          )}
         </div>
       </main>
 

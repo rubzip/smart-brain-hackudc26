@@ -659,6 +659,159 @@ body {
   margin-top: 0.5rem;
 }
 
+/* Search Tool Styles */
+.search-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 1rem;
+  font-size: 1rem;
+  border-radius: 16px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px dashed rgba(99, 102, 241, 0.3);
+  transition: all 0.3s;
+}
+
+.search-toggle-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-style: solid;
+  transform: translateY(-2px);
+}
+
+.search-tool-panel {
+  padding: 1.5rem !important;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-tool-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-tool-header h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.close-tool-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.categories-grid-tiny {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.cat-chip-tiny {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-muted);
+}
+
+.cat-chip-tiny.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: var(--text-main);
+}
+
+.cat-emoji-tiny {
+  font-size: 1rem;
+}
+
+.cat-label-tiny {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.search-tool-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.clear-link-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.search-submit-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.search-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem !important;
+  text-align: center;
+  gap: 1rem;
+}
+
+.no-results-emoji {
+  font-size: 3rem;
+}
+
+.search-no-results p {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
 /* Carousel Styles */
 .suggestion-carousel-panel {
   display: flex;
