@@ -62,9 +62,11 @@ class DailyPlanResponse(BaseModel):
     generated_at: str
     message: str
 
+
 class SentimentCreate(BaseModel):
-    sentiment: Literal['happy', 'sad', 'tired']
+    sentiment: Literal["happy", "sad", "tired"]
+
 
 class SentimentResponse(BaseModel):
-    sentiment: Literal['happy', 'sad', 'tired']
+    sentiment: Literal["happy", "sad", "tired"]
     generated_at: datetime = Field(default_factory=datetime.utcnow)
