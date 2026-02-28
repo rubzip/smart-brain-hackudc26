@@ -14,6 +14,17 @@ Entre las multiples funcionalidades que ofrece el Smart Brain, destacan:
  * Backend: FastAPI, Postgres, 
  * LLMs: 
 
+## Test Driven Development
+Hemos utilizado una metodologia TDD para el desarrollo de la aplicacion. Todas las utilidades del backend se han evaluado sobre una batería intensiva de pruebas unitarias.
+
+## Formatos Aceptados
+ * Texto plano
+ * Webpages
+ * PDF
+ * Office like (Odt, Docx, Xlsx)
+ * Video / audio ????
+ * YouTube ??? 
+
 ## How to run
 ### Backend
 ```bash
