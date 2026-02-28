@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { DeepChat } from 'deep-chat-react';
 import { API_BASE_URL } from '../config';
 
-const ChatInterface = ({ isOpen, onClose }) => {
+const ChatInterface = React.memo(({ isOpen, onClose }) => {
     const chatRequest = useMemo(() => ({
         url: `${API_BASE_URL}/chat`,
         method: 'POST',
@@ -73,7 +73,8 @@ const ChatInterface = ({ isOpen, onClose }) => {
             </div>
         </div>
     );
-};
+});
+
 
 
 export default ChatInterface;

@@ -14,6 +14,57 @@ import AddItem from './components/AddItem'
 import SearchTool from './components/SearchTool'
 import { API_BASE_URL } from './config'
 
+const weeklyData = [
+  { day: 'Mon', completion: 65 },
+  { day: 'Tue', completion: 40 },
+  { day: 'Wed', completion: 85 },
+  { day: 'Thu', completion: 50 },
+  { day: 'Fri', completion: 95 },
+  { day: 'Sat', completion: 70 },
+  { day: 'Sun', completion: 30 }
+]
+
+const moods = [
+  { label: 'Happy', emoji: '😄', value: 'happy' },
+  { label: 'Tired', emoji: '🫩', value: 'tired' },
+  { label: 'Sad', emoji: '😔', value: 'sad' }
+]
+
+const moodPhrases = {
+  happy: "Happiness is contagious! Keep that energy and tackle your most creative tasks today. 🌟",
+  tired: "You're not alone. Take a break and recharge. 😴",
+  sad: "It's okay to feel down. Be kind to yourself. Focus on small wins today. 🫂"
+}
+
+const suggestions = [
+  {
+    id: 1,
+    type: 'Video',
+    title: 'Clean Code - Uncle Bob',
+    icon: '🎥',
+    url: 'https://www.youtube.com/watch?v=7EmboKQH8lM',
+    youtube_url: 'https://www.youtube.com/watch?v=7EmboKQH8lM',
+    summary: 'A deep dive into the principles of writing clean, maintainable code by Robert C. Martin. Essential for professional developers.'
+  },
+  {
+    id: 2,
+    type: 'Article',
+    title: 'The MIT License',
+    icon: '📝',
+    url: 'https://opensource.org/license/mit',
+    summary: 'A short and simple permissive software license with very few restrictions. Perfect for open source projects.'
+  },
+  {
+    id: 3,
+    type: 'Video',
+    title: 'Never Gonna Give You Up',
+    icon: '🎥',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    summary: 'A legendary masterpiece of digital culture. An essential piece of internet history that everyone should experience.'
+  }
+]
+
 function App() {
   const [tasks, setTasks] = useState([])
   const [tasksLoading, setTasksLoading] = useState(true)
@@ -38,15 +89,6 @@ function App() {
   const [searchResults, setSearchResults] = useState([])
   const [isSearching, setIsSearching] = useState(false)
 
-  const weeklyData = [
-    { day: 'Mon', completion: 65 },
-    { day: 'Tue', completion: 40 },
-    { day: 'Wed', completion: 85 },
-    { day: 'Thu', completion: 50 },
-    { day: 'Fri', completion: 95 },
-    { day: 'Sat', completion: 70 },
-    { day: 'Sun', completion: 30 }
-  ]
 
   const [schedule, setSchedule] = useState([
     { id: 1, title: 'Deep Work Session', start: '09:00', end: '11:00', icon: '💻', type: 'work' },
@@ -192,17 +234,6 @@ function App() {
 
   const upNext = schedule[0];
 
-  const moods = [
-    { label: 'Happy', emoji: '😄', value: 'happy' },
-    { label: 'Tired', emoji: '🫩', value: 'tired' },
-    { label: 'Sad', emoji: '😔', value: 'sad' }
-  ]
-
-  const moodPhrases = {
-    happy: "Happiness is contagious! Keep that energy and tackle your most creative tasks today. 🌟",
-    tired: "You're not alone. Take a break and recharge. 😴",
-    sad: "It's okay to feel down. Be kind to yourself. Focus on small wins today. 🫂"
-  }
 
   const handleMoodSubmit = async (moodValue) => {
     setSelectedMood(moodValue);
@@ -227,34 +258,6 @@ function App() {
     }, 5000);
   };
 
-  const suggestions = [
-    {
-      id: 1,
-      type: 'Video',
-      title: 'Clean Code - Uncle Bob',
-      icon: '🎥',
-      url: 'https://www.youtube.com/watch?v=7EmboKQH8lM',
-      youtube_url: 'https://www.youtube.com/watch?v=7EmboKQH8lM',
-      summary: 'A deep dive into the principles of writing clean, maintainable code by Robert C. Martin. Essential for professional developers.'
-    },
-    {
-      id: 2,
-      type: 'Article',
-      title: 'The MIT License',
-      icon: '📝',
-      url: 'https://opensource.org/license/mit',
-      summary: 'A short and simple permissive software license with very few restrictions. Perfect for open source projects.'
-    },
-    {
-      id: 3,
-      type: 'Video',
-      title: 'Never Gonna Give You Up',
-      icon: '🎥',
-      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      summary: 'A legendary masterpiece of digital culture. An essential piece of internet history that everyone should experience.'
-    }
-  ]
 
   const [currentSuggestion, setCurrentSuggestion] = useState(0)
 

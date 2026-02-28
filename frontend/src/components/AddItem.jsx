@@ -85,27 +85,27 @@ const AddItem = ({ isOpen, onClose }) => {
     return (
         <div className="chat-window-overlay" onClick={onClose}>
             <section className="chat-window-container glass add-item-overlay" onClick={(e) => e.stopPropagation()}>
-                <header className="add-item-header">
-                    <div className="header-top">
-                        <div className="brain-icon">🧠</div>
-                        <h2>Add to Brain</h2>
-                        <button className="close-chat" onClick={onClose} style={{ marginLeft: 'auto' }}>✕</button>
-                    </div>
-                    <div className="tab-switcher-premium">
-                        <button
-                            className={`tab-link ${activeTab === 'url' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('url')}
-                        >
-                            URL
-                        </button>
-                        <button
-                            className={`tab-link ${activeTab === 'upload' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('upload')}
-                        >
-                            File
-                        </button>
-                    </div>
+                <header className="chat-window-header">
+                    <h2>Add to Brain 🧠</h2>
+                    <button className="close-chat" onClick={onClose}>✕</button>
                 </header>
+
+                <p className="modal-subtitle-premium">Expand your digital knowledge by saving new resources.</p>
+
+                <div className="tab-switcher-premium">
+                    <button
+                        className={`tab-link ${activeTab === 'url' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('url')}
+                    >
+                        🌐 URL Link
+                    </button>
+                    <button
+                        className={`tab-link ${activeTab === 'upload' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('upload')}
+                    >
+                        📁 Local File
+                    </button>
+                </div>
 
                 <div className="add-item-body">
                     {activeTab === 'url' ? (
@@ -114,16 +114,16 @@ const AddItem = ({ isOpen, onClose }) => {
                                 <label>Title (Optional)</label>
                                 <input
                                     type="text"
-                                    placeholder="Article or video title"
+                                    placeholder="Enter a descriptive title"
                                     value={urlInfo.title}
                                     onChange={(e) => setUrlInfo({ ...urlInfo, title: e.target.value })}
                                 />
                             </div>
                             <div className="input-group-premium">
-                                <label>URL</label>
+                                <label>Resource URL</label>
                                 <input
                                     type="url"
-                                    placeholder="https://youtube.com/..."
+                                    placeholder="https://example.com/article"
                                     value={urlInfo.url}
                                     onChange={(e) => setUrlInfo({ ...urlInfo, url: e.target.value })}
                                 />
@@ -146,8 +146,9 @@ const AddItem = ({ isOpen, onClose }) => {
                                         </div>
                                     ) : (
                                         <>
-                                            <span className="uploader-icon">📁</span>
-                                            <span>Click to browse files</span>
+                                            <span className="uploader-icon" style={{ fontSize: '2.5rem' }}>📤</span>
+                                            <span style={{ fontWeight: 700 }}>Click to browse or drop file</span>
+                                            <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>PDF, TXT, DOCX supported</span>
                                         </>
                                     )}
                                 </label>
@@ -156,7 +157,7 @@ const AddItem = ({ isOpen, onClose }) => {
                     )}
 
                     <div className="category-section-premium">
-                        <label className="section-label-tiny">Category</label>
+                        <label className="section-label-tiny">Target Category</label>
                         <div className="category-list-vertical">
                             {categories.map(cat => (
                                 <div
@@ -178,7 +179,7 @@ const AddItem = ({ isOpen, onClose }) => {
                             onClick={activeTab === 'url' ? handleUrlSave : handleFileUpload}
                             disabled={status === 'saving' || (activeTab === 'url' ? !urlInfo.url : !fileInfo.file)}
                         >
-                            {status === 'saving' ? 'Processing...' : status === 'success' ? 'Saved Successfully!' : 'Save to Brain'}
+                            {status === 'saving' ? 'Processing...' : status === 'success' ? 'Successfully Added! ✨' : 'Save to Brain'}
                         </button>
                         {status === 'error' && <p className="error-text-mini">Failed to save. Try again.</p>}
                     </footer>

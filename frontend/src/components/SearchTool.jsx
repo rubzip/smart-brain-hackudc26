@@ -35,19 +35,18 @@ const SearchTool = ({ isOpen, onClose, onSearch, onClear }) => {
     return (
         <div className="chat-window-overlay" onClick={onClose}>
             <article className="chat-window-container glass search-tool-overlay" onClick={(e) => e.stopPropagation()}>
-                <header className="search-tool-header">
-                    <div className="header-left">
-                        <span className="search-icon-small">🔍</span>
-                        <h3>Search</h3>
-                    </div>
+                <header className="chat-window-header">
+                    <h2>Search Brain 🔍</h2>
                     <button className="close-chat" onClick={onClose}>✕</button>
                 </header>
+
+                <p className="modal-subtitle-premium">Locate any resource across your entire digital knowledge base.</p>
 
                 <div className="search-tool-body">
                     <div className="search-input-wrapper">
                         <input
                             type="text"
-                            placeholder="Find files, videos, or articles..."
+                            placeholder="Type keywords (e.g., 'Clean Code', 'MIT')..."
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -56,7 +55,7 @@ const SearchTool = ({ isOpen, onClose, onSearch, onClear }) => {
                     </div>
 
                     <div className="search-categories">
-                        <label className="section-label-tiny">Filter by Brain Category</label>
+                        <label className="section-label-tiny">Filter by categories</label>
                         <div className="categories-grid-tiny">
                             {categories.map(cat => (
                                 <button
@@ -71,10 +70,10 @@ const SearchTool = ({ isOpen, onClose, onSearch, onClear }) => {
                         </div>
                     </div>
 
-                    <footer className="search-tool-footer" style={{ marginTop: '1rem' }}>
-                        <button className="clear-link-btn" onClick={handleClear} style={{ fontSize: '0.95rem' }}>Clear filters</button>
-                        <button className="search-submit-btn" onClick={handleSearch} style={{ padding: '12px 32px', fontSize: '1rem' }}>
-                            Search Brain
+                    <footer className="search-tool-footer" style={{ marginTop: '1.5rem' }}>
+                        <button className="clear-link-btn" onClick={handleClear}>Reset filters</button>
+                        <button className="search-submit-btn" onClick={handleSearch} style={{ padding: '14px 40px', fontSize: '1.05rem' }}>
+                            Perform Search
                         </button>
                     </footer>
                 </div>
