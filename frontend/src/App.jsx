@@ -4,12 +4,21 @@ import './App.css'
 
 function App() {
   const [tasks, setTasks] = useState([
-    { id: 1, text: '📖 Read 20 pages', completed: false },
+    { id: 1, text: '📖 Read 20 pages of Clean Code', completed: false },
     { id: 2, text: '🚿 Take a shower', completed: false },
-    { id: 3, text: '👟 Walk 10k steps', completed: false },
+    { id: 3, text: '💻 3 commits to an open source project', completed: false },
     { id: 4, text: '🏋️ Exercise', completed: false },
     { id: 5, text: '👵 Call your grandma', completed: false }
   ])
+
+  const suggestions = [
+    { id: 1, type: 'Article', title: 'Building better prompts', icon: '📝' },
+    { id: 2, type: 'Video', title: 'React state patterns', icon: '🎥' },
+    { id: 3, type: 'Paper', title: 'Retrieval-augmented systems', icon: '📄' },
+    { id: 4, type: 'Talk', title: 'Productive dev workflows', icon: '🎤' }
+  ]
+
+  const [currentSuggestion, setCurrentSuggestion] = useState(0)
 
   const completedCount = tasks.filter(t => t.completed).length
   const progress = (completedCount / tasks.length) * 100
@@ -28,43 +37,54 @@ function App() {
   }
 
   const triggerDopamine = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#2563eb', '#10b981', '#f59e0b', '#ec4899']
+    import('canvas-confetti').then(confetti => {
+      confetti.default({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#2563eb', '#10b981', '#f59e0b', '#ec4899']
+      })
     })
   }
 
   useEffect(() => {
     if (completedCount === tasks.length && tasks.length > 0) {
-      // Mega Celebration
-      const duration = 3 * 1000
-      const end = Date.now() + duration
+      import('canvas-confetti').then(confetti => {
+        const duration = 3 * 1000
+        const end = Date.now() + duration
 
-      const frame = () => {
-        confetti({
-          particleCount: 5,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: ['#2563eb', '#10b981']
-        })
-        confetti({
-          particleCount: 5,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: ['#f59e0b', '#ec4899']
-        })
+        const frame = () => {
+          confetti.default({
+            particleCount: 5,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#2563eb', '#10b981']
+          })
+          confetti.default({
+            particleCount: 5,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#f59e0b', '#ec4899']
+          })
 
-        if (Date.now() < end) {
-          requestAnimationFrame(frame)
+          if (Date.now() < end) {
+            requestAnimationFrame(frame)
+          }
         }
-      }
-      frame()
+        frame()
+      })
     }
   }, [completedCount, tasks.length])
+
+  const nextSuggestion = () => {
+    setCurrentSuggestion((prev) => (prev + 1) % suggestions.length)
+  }
+
+  const prevSuggestion = () => {
+    setCurrentSuggestion((prev) => (prev - 1 + suggestions.length) % suggestions.length)
+  }
 
   return (
     <div className="app-shell">
@@ -118,14 +138,38 @@ function App() {
           </article>
         </section>
 
-        <section className="panel right-column">
-          <h2>Suggestions (stored links)</h2>
-          <ul className="suggestion-list">
-            <li>Article: Building better prompts</li>
-            <li>Video: React state patterns</li>
-            <li>Paper: Retrieval-augmented systems</li>
-            <li>Talk: Productive dev workflows</li>
-          </ul>
+        <section className="panel right-column suggestion-carousel-panel">
+          <h2>Your Brain Suggestions</h2>
+          <div className="carousel-container">
+            <button className="carousel-btn prev" onClick={prevSuggestion}>←</button>
+
+            <div className="carousel-track">
+              {suggestions.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`suggestion-card ${index === currentSuggestion ? 'active' : ''}`}
+                  style={{ transform: `translateX(${(index - currentSuggestion) * 105}%)` }}
+                >
+                  <div className="card-icon">{item.icon}</div>
+                  <div className="card-tag">{item.type}</div>
+                  <h3 className="card-title">{item.title}</h3>
+                  <button className="open-btn">View content</button>
+                </div>
+              ))}
+            </div>
+
+            <button className="carousel-btn next" onClick={nextSuggestion}>→</button>
+          </div>
+
+          <div className="carousel-indicators">
+            {suggestions.map((_, index) => (
+              <div
+                key={index}
+                className={`indicator ${index === currentSuggestion ? 'active' : ''}`}
+                onClick={() => setCurrentSuggestion(index)}
+              ></div>
+            ))}
+          </div>
         </section>
       </main>
 
