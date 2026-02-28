@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from loader import get_pdf
+from utils.loader import get_pdf_from_stream
 
 def test_get_pdf_with_real_file():
     """
@@ -23,7 +23,7 @@ def test_get_pdf_with_real_file():
         pdf_bytes = f.read()
 
     # 4. Extraer el texto
-    extracted_text = get_pdf(pdf_bytes)
+    extracted_text = get_pdf_from_stream(pdf_bytes)
     print(len(extracted_text))  # Imprime la longitud del texto extraído para verificar que no esté vacío
     print(extracted_text[:500])  # Imprime los primeros 500 caracteres para inspección visual rápida
 

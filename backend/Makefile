@@ -14,12 +14,12 @@ setup: ## Create a virtual environment with uv
 install: ## Install dependencies from requierements.txt
 	$(UV) pip install -r requierements.txt
 
-activate: ## Instructions to activate the environment
-	@echo "Run the following command to activate your environment:"
+activate: ## Show the command to activate the environment
+	@echo "To activate the environment, run this in your terminal:"
 	@echo "source $(VENV)/bin/activate"
 
 test: ## Run tests using uv run (no activation needed)
-	$(UV) run pytest utils/
+	$(UV) run pytest tests/
 
 clean: ## Remove the virtual environment
 	rm -rf $(VENV)

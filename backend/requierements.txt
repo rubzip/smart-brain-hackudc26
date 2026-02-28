@@ -2,3 +2,5 @@ pytest
 PyMuPDF
 requests
 bs4
+python-docx
+odfpy

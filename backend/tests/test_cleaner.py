@@ -1,6 +1,6 @@
 import pytest
 
-from cleaner import clean_text
+from utils.cleaner import clean_text
 
 # --- TESTS ---
 
