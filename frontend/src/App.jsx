@@ -227,7 +227,6 @@ function App() {
                         <div className="video-embed">
                           <iframe
                             width="100%"
-                            height="180"
                             src={`https://www.youtube.com/embed/${youtubeId}`}
                             title="YouTube video player"
                             frameBorder="0"
