@@ -430,22 +430,21 @@ def _generate_daily_plan_prompt() -> str:
         return ""
     
     prompt = (
-        "Based on the following stored items in a personal knowledge base, "
-        "generate a structured list of 5-7 daily goals/tasks that align with these resources and interests.\n\n"
+        "You are a task planner. Based on the following stored items in a personal knowledge base, "
+        "generate ONLY a JSON array with 4-6 daily goals/tasks.\n\n"
         "STORED ITEMS:\n"
         + "\n".join(items_summary)
         + "\n\n"
-        "Please return a JSON array with this exact format (and ONLY the JSON, no other text):\n"
+        "Return ONLY valid JSON (no code, no markdown, no extra text):\n"
         '[\n'
         '  {"id": "1", "text": "📖 Read X from resource Y", "completed": false},\n'
         '  {"id": "2", "text": "💻 Work on Z project", "completed": false}\n'
         ']\n\n'
         "Requirements:\n"
-        "- Each task should include an emoji at the start\n"
+        "- Include an emoji at the start of each task\n"
         "- Make tasks specific and actionable\n"
-        "- Prioritize diverse activities (learning, coding, health, creativity, etc.)\n"
-        "- Keep task text under 60 characters\n"
-        "- All tasks should start as not completed"
+        "- Keep each task under 60 characters\n"
+        "- Return ONLY the JSON array, nothing else"
     )
     
     return prompt
@@ -458,7 +457,7 @@ async def _call_ollama_for_plan(prompt: str) -> list[DailyTask] | None:
     
     try:
         response = ollama.generate(
-            model="phi",  # Cambia por el modelo que uses
+            model="phi",
             prompt=prompt,
             stream=False,
         )
@@ -480,17 +479,21 @@ async def _call_ollama_for_plan(prompt: str) -> list[DailyTask] | None:
         except json.JSONDecodeError:
             # Si falla el parsing, intentar extraer JSON del texto
             import re
-            json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
+            # Buscar JSON array entre [ y ] (incluyendo anidados)
+            json_match = re.search(r'\[(?:[^\[\]]|(?:\[.*?\]))*\]', response_text, re.DOTALL)
             if json_match:
-                tasks_data = json.loads(json_match.group())
-                return [
-                    DailyTask(
-                        id=str(task.get("id", str(uuid.uuid4()))),
-                        text=task.get("text", ""),
-                        completed=task.get("completed", False)
-                    )
-                    for task in tasks_data
-                ]
+                try:
+                    tasks_data = json.loads(json_match.group())
+                    return [
+                        DailyTask(
+                            id=str(task.get("id", str(uuid.uuid4()))),
+                            text=task.get("text", ""),
+                            completed=task.get("completed", False)
+                        )
+                        for task in tasks_data
+                    ]
+                except (json.JSONDecodeError, TypeError):
+                    pass
         
         return None
     
