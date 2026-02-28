@@ -26,6 +26,86 @@ function App() {
     { day: 'Sun', completion: 30 }
   ]
 
+  const [schedule, setSchedule] = useState([
+    { id: 1, title: 'Deep Work Session', start: '09:00', end: '11:00', icon: '💻', type: 'work' },
+    { id: 2, title: 'Team Sync', start: '11:30', end: '12:30', icon: '🤝', type: 'meeting' },
+    { id: 3, title: 'Gym & Core', start: '14:00', end: '15:30', icon: '🏋️', type: 'health' },
+    { id: 4, title: 'Client Presentation', start: '16:00', end: '17:30', icon: '📈', type: 'work' }
+  ])
+
+  const [accessToken, setAccessToken] = useState(null);
+  const [tokenClient, setTokenClient] = useState(null);
+
+  // IMPORTANT: Replace with your actual Google OAuth Client ID
+  const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+  const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+
+  useEffect(() => {
+    // Load Google Identity Services script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: (response) => {
+          if (response.error !== undefined) {
+            throw (response);
+          }
+          setAccessToken(response.access_token);
+          fetchEvents(response.access_token);
+        },
+      });
+      setTokenClient(client);
+    };
+    document.body.appendChild(script);
+  }, []);
+
+  const handleAuthClick = () => {
+    if (tokenClient) {
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+  };
+
+  const fetchEvents = async (token) => {
+    const now = new Date();
+    const timeMin = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+    const timeMax = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+
+      if (data.items && data.items.length > 0) {
+        const mappedEvents = data.items.map((event, index) => ({
+          id: event.id || index,
+          title: event.summary || 'Untitled Event',
+          start: new Date(event.start.dateTime || event.start.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          end: new Date(event.end.dateTime || event.end.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          icon: event.summary?.toLowerCase().includes('work') ? '💻' :
+            event.summary?.toLowerCase().includes('gym') ? '🏋️' :
+              event.summary?.toLowerCase().includes('sync') ? '🤝' : '📅',
+          type: event.summary?.toLowerCase().includes('gym') ? 'health' :
+            event.summary?.toLowerCase().includes('sync') ? 'meeting' : 'work'
+        }));
+        setSchedule(mappedEvents);
+      }
+    } catch (error) {
+      console.error('Error fetching calendar events:', error);
+    }
+  };
+
+  const upNext = schedule[0]; // Logic for "Up Next"
+
   const moods = [
     { label: 'Happy', emoji: '😄', value: 'happy' },
     { label: 'Tired', emoji: '🫩', value: 'tired' },
@@ -197,13 +277,42 @@ function App() {
             )}
           </article>
 
-          <article className="panel">
-            <h2>Pending calendar events</h2>
-            <ul className="event-list">
-              <li>Mon · Team sync · 10:00</li>
-              <li>Tue · Design review · 12:30</li>
-              <li>Thu · Demo prep · 16:00</li>
-            </ul>
+          <article className="panel schedule-panel">
+            <div className="schedule-header">
+              <h2>Pending for Today</h2>
+              <div className="schedule-actions">
+                {!accessToken ? (
+                  <button className="connect-calendar-btn" onClick={handleAuthClick}>
+                    <span className="google-icon">G</span> Connect Calendar
+                  </button>
+                ) : (
+                  <span className="event-count">{schedule.length} events</span>
+                )}
+              </div>
+            </div>
+
+            <div className="up-next-banner">
+              <span className="up-next-label">UP NEXT</span>
+              <div className="up-next-content">
+                <span className="up-next-icon">{upNext.icon}</span>
+                <div className="up-next-details">
+                  <h3>{upNext.title}</h3>
+                  <span>{upNext.start} - {upNext.end}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="schedule-list">
+              {schedule.filter(event => event.id !== upNext.id).map(event => (
+                <div key={event.id} className={`schedule-card ${event.type}`}>
+                  <span className="event-icon">{event.icon}</span>
+                  <div className="event-info">
+                    <h4>{event.title}</h4>
+                    <span className="event-time">{event.start} - {event.end}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </article>
         </section>
 

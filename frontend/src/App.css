@@ -243,6 +243,173 @@ body {
   border-radius: 12px;
 }
 
+/* Schedule Styles */
+.schedule-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.schedule-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.connect-calendar-btn {
+  background: white;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.connect-calendar-btn:hover {
+  background: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+}
+
+.google-icon {
+  font-weight: 900;
+  font-family: 'Product Sans', sans-serif;
+  color: #4285f4;
+}
+
+.event-count {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.up-next-banner {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(16, 185, 129, 0.1));
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 18px;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.up-next-label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--primary);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 4px 12px;
+  border-bottom-left-radius: 12px;
+  letter-spacing: 0.05em;
+}
+
+.up-next-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.up-next-icon {
+  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+}
+
+.up-next-details h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.up-next-details span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.schedule-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.schedule-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateX(5px);
+  border-color: var(--primary);
+}
+
+.event-icon {
+  font-size: 1.25rem;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.event-info h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.event-time {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Specific types */
+.schedule-card.work .event-icon {
+  color: #818cf8;
+}
+
+.schedule-card.meeting .event-icon {
+  color: #f59e0b;
+}
+
+.schedule-card.health .event-icon {
+  color: #10b981;
+}
+
 /* Carousel Styles */
 .suggestion-carousel-panel {
   display: flex;
