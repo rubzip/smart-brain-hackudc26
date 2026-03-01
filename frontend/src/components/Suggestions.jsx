@@ -19,8 +19,7 @@ const Suggestions = ({ suggestions }) => {
 
     return (
         <section className="panel right-column suggestion-carousel-panel">
-            <h2>Your Brain Suggestions</h2>
-            <p className="section-description">Your content recommendations for today</p>
+            <h2>Content Suggested</h2>
             <div className="carousel-container">
                 <button className="carousel-btn prev" onClick={prevSuggestion}>←</button>
 
