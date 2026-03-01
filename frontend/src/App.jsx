@@ -324,8 +324,13 @@ function App() {
   const handleGlobalSearch = async ({ query, tags }) => {
     setIsSearching(true);
     try {
-      const tagParams = tags.length > 0 ? `&tags=${tags.join(',')}` : '';
-      const response = await fetch(`${API_BASE_URL}/items?q=${query}${tagParams}`);
+      const response = await fetch(`${API_BASE_URL}/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query, tags }),
+      });
       const data = await response.json();
 
       const mappedResults = (data.items || []).map(item => ({
