@@ -77,6 +77,5 @@ npm run dev
 ## 📄 Licencia
 Este proyecto está bajo la Licencia MIT. Para más detalles, consulta el archivo [LICENSE](LICENSE).
 
-Justificación...
 ---
 *Desarrollado en 36 horas por [Alejandro](https://github.com/alejandro2406), [Cosme](https://github.com/cosme8) y [Rubén](https://github.com/rubzip) para el HackUDC 2026 durante el 27 de Febrero de 2026 y el 1 de Marzo de 2026*.
