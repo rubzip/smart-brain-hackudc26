@@ -32,6 +32,7 @@ from models import (
     SentimentResponse,
     StoredItemResponse,
     URLItemCreate,
+    SearchRequest,
 )
 from utils.loader import (
     get_docx_from_stream,
@@ -446,6 +447,15 @@ async def list_items(
         "total": len(items_summary),
         "items": items_summary,
     }
+
+
+@app.post("/api/v1/search")
+async def search_items(payload: SearchRequest) -> list[dict]:
+    if not item_dao:
+        raise HTTPException(status_code=503, detail="Database not initialized")
+    
+    items = await item_dao.list_by_search(payload.query, payload.tags)
+    return items
 
 
 @app.get("/api/v1/items/{item_id}")

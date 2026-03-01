@@ -70,3 +70,8 @@ class SentimentCreate(BaseModel):
 class SentimentResponse(BaseModel):
     sentiment: Literal["happy", "sad", "tired"]
     generated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class SearchRequest(BaseModel):
+    query: str | None = None
+    tags: list[str] = Field(default_factory=list)

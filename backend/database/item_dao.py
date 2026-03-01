@@ -66,6 +66,9 @@ class ItemDAO:
             rows = await conn.fetch(query, search_pattern, limit)
             return [dict(row) for row in rows]
     
+    async def list_by_tags(self, query: str, tags: list[str], limit: int = 5) -> list[dict]:
+        pass
+    
     async def delete(self, item_id: UUID) -> bool:
         """Delete item and cascade to embeddings."""
         async with self.pool.acquire() as conn:
