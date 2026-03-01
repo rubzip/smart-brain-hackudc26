@@ -1,3 +1,10 @@
+/**
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ * Copyright (C) 2026 Smart Brain Contributors
+ * This file is part of Smart Brain.
+ * See LICENSE at the project root for full terms.
+ */
+
 import React from 'react';
 
 const MoodDock = ({ moodFeedback, moods, handleMoodSubmit, setIsStatsOpen, setMoodFeedback, setSelectedMood }) => {

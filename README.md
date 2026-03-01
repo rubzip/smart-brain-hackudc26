@@ -223,7 +223,26 @@ pip install -r backend/requierements.txt
 ---
 
 ## 📄 Licencia
-Este proyecto está bajo la Licencia MIT. Para más detalles, consulta el archivo [LICENSE](LICENSE).
+
+**GNU Affero General Public License v3 (AGPL-3.0)**
+
+Este proyecto es **software libre** bajo licencia AGPL v3. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+### ¿Qué significa?
+
+- ✅ **Libertad de usar**: Puedes ejecutar Smart Brain para cualquier propósito
+- ✅ **Libertad de estudiar**: Acceso total al código fuente
+- ✅ **Libertad de modificar**: Puedes adaptar el código a tus necesidades
+- ✅ **Libertad de compartir**: Puedes distribuir copias y mejoras
+- ⚖️ **Restricción de copyleft**: Las modificaciones y servicios basados en este código **deben permanecer bajo AGPL v3**
+- ⚖️ **Acceso a fuentes**: Si lo ofreces como servicio online, debes permitir a los usuarios acceder al código modificado
+
+### Dependencias libres
+
+Todas las dependencias principales son software libre:
+- **Backend**: FastAPI, Ollama, sentence-transformers (Apache 2.0, BSD)
+- **Frontend**: React, Vite (MIT)
+- **Base de datos**: PostgreSQL (PostgreSQL License)
 
 ---
 *Desarrollado en 36 horas por [Alejandro](https://github.com/alejandro2406), [Cosme](https://github.com/cosme8) y [Rubén](https://github.com/rubzip) para el HackUDC 2026 entre el 27 de Febrero de 2026 y el 1 de Marzo de 2026*.

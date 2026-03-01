@@ -1,3 +1,15 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Smart Brain Contributors
+#
+# This file is part of Smart Brain.
+# Smart Brain is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# See the LICENSE file at the project root for full terms.
+
 """PostgreSQL database connection management."""
 import os
 from typing import AsyncGenerator
