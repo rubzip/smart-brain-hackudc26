@@ -9,10 +9,10 @@ import React, { useState, useEffect } from 'react';
 
 // Cross-browser compatibility: Firefox uses 'browser' API, Chrome uses 'chrome' API
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+const API_BASE_URL = 'http://localhost:5000/api/v1';
 
 const App = () => {
-    const [pageInfo, setPageInfo] = useState({ title: '', url: '' });
-    const [category, setCategory] = useState('Work');
+    const [pageInfo, setPageInfo] = useState({ title: '', url: '', category: 'Work' });
     const [status, setStatus] = useState('idle'); // idle, saving, success, error
 
     const categories = [
@@ -22,41 +22,40 @@ const App = () => {
     ];
 
     useEffect(() => {
-        // Get current tab info (works in both Chrome and Firefox)
+        // Get current tab info
         if (browserAPI && browserAPI.tabs) {
             browserAPI.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
                 const activeTab = tabs[0];
-                setPageInfo({
-                    title: activeTab.title || '',
-                    url: activeTab.url || ''
-                });
-            }).catch(() => {
-                // Fallback for development or errors
-                setPageInfo({ title: 'Mock Page', url: 'https://example.com' });
+                if (activeTab) {
+                    setPageInfo(prev => ({
+                        ...prev,
+                        title: activeTab.title || '',
+                        url: activeTab.url || ''
+                    }));
+                }
+            }).catch(err => {
+                console.warn('Tab query failed, using mock data:', err);
             });
-        } else {
-            // Mock for development
-            setPageInfo({ title: 'Mock Page', url: 'https://example.com' });
         }
     }, []);
 
     const handleSave = async () => {
+        if (!pageInfo.url) return;
         setStatus('saving');
         try {
-            const response = await fetch('http://localhost:5000/api/v1/items/urls', {
+            const response = await fetch(`${API_BASE_URL}/items/urls`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     url: pageInfo.url,
-                    title: pageInfo.title,
-                    tags: [category]
+                    title: pageInfo.title || null,
+                    tags: [pageInfo.category]
                 }),
             });
 
             if (response.ok) {
                 setStatus('success');
+                setTimeout(() => setStatus('idle'), 3000);
             } else {
                 setStatus('error');
             }
@@ -67,48 +66,34 @@ const App = () => {
     };
 
     return (
-        <div className="add-item-panel extension-container">
+        <div className="extension-container glass">
             <header className="add-item-header">
                 <div className="header-top">
-                    <div className="brain-icon">🧠</div>
+                    <span className="brain-icon">🧠</span>
                     <h2>Smart Brain</h2>
                 </div>
+                <p className="modal-subtitle-tiny">Instant knowledge preservation.</p>
             </header>
 
             <div className="add-item-body">
-                <div className="input-section">
-                    <div className="input-group-premium">
-                        <label>Title</label>
-                        <input
-                            type="text"
-                            placeholder="Title"
-                            value={pageInfo.title}
-                            onChange={(e) => setPageInfo({ ...pageInfo, title: e.target.value })}
-                        />
-                    </div>
-                    <div className="input-group-premium">
-                        <label>URL</label>
-                        <input
-                            type="url"
-                            placeholder="URL"
-                            value={pageInfo.url}
-                            onChange={(e) => setPageInfo({ ...pageInfo, url: e.target.value })}
-                        />
-                    </div>
+                <div className="detected-info-premium">
+                    <span className="detected-label">Detected Page</span>
+                    <h3 className="detected-title">{pageInfo.title || 'Untitled Page'}</h3>
+                    <span className="detected-url">{pageInfo.url}</span>
                 </div>
 
                 <div className="category-section-premium">
-                    <label className="section-label-tiny">Category</label>
+                    <label className="section-label-tiny">Save to Category</label>
                     <div className="category-list-vertical">
                         {categories.map((cat) => (
                             <div
                                 key={cat.id}
-                                className={`category-row-item ${category === cat.id ? 'selected' : ''}`}
-                                onClick={() => setCategory(cat.id)}
+                                className={`category-row-item ${pageInfo.category === cat.id ? 'selected' : ''}`}
+                                onClick={() => setPageInfo({ ...pageInfo, category: cat.id })}
                             >
                                 <span className="cat-emoji">{cat.emoji}</span>
                                 <span className="cat-label-text">{cat.label}</span>
-                                {category === cat.id && <span className="cat-checkmark">✓</span>}
+                                {pageInfo.category === cat.id && <span className="cat-checkmark">✓</span>}
                             </div>
                         ))}
                     </div>
@@ -118,11 +103,17 @@ const App = () => {
                     <button
                         className={`save-brain-btn ${status === 'saving' ? 'loading' : ''} ${status === 'success' ? 'success' : ''}`}
                         onClick={handleSave}
-                        disabled={status === 'saving'}
+                        disabled={status === 'saving' || !pageInfo.url}
                     >
-                        {status === 'saving' ? 'Saving...' : status === 'success' ? 'Saved Successfully!' : 'Save to Brain'}
+                        {status === 'saving' ? (
+                            <span className="loading-icon">⏳</span>
+                        ) : status === 'success' ? (
+                            'Saved to Brain! ✨'
+                        ) : (
+                            'Save to Brain'
+                        )}
                     </button>
-                    {status === 'error' && <p className="error-text-mini">Failed to save. Try again.</p>}
+                    {status === 'error' && <p className="error-text-mini">Failed to save. Is the backend running?</p>}
                 </footer>
             </div>
         </div>

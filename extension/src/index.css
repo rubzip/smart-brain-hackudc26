@@ -1,12 +1,13 @@
 :root {
   --primary: #6366f1;
-  --primary-hover: #4f46e5;
+  --primary-glow: rgba(99, 102, 241, 0.5);
   --accent: #10b981;
   --bg-dark: #0f172a;
-  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(30, 41, 59, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
+  --panel-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
 }
 
 body {
@@ -17,12 +18,15 @@ body {
   color: var(--text-main);
   width: 320px;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 .extension-container {
   padding: 1.25rem;
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-  min-height: 400px;
+  background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
 }
 
 .add-item-header {
@@ -37,89 +41,107 @@ body {
 
 .brain-icon {
   font-size: 1.5rem;
-  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.4));
+  filter: drop-shadow(0 0 10px var(--primary-glow));
 }
 
 .add-item-header h2 {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  color: var(--text-main);
+  background: linear-gradient(135deg, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin: 0;
+}
+
+.modal-subtitle-tiny {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.detected-info-premium {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  padding: 1.25rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+  animation: containerSnappy 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.detected-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.detected-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.detected-url {
+  font-size: 0.7rem;
+  color: var(--primary);
+  opacity: 0.8;
+  margin-top: 4px;
+  word-break: break-all;
+  display: block;
 }
 
 .add-item-body {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
+  flex-grow: 1;
 }
 
-.input-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.input-group-premium {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.input-group-premium label,
 .section-label-tiny {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--text-muted);
   letter-spacing: 0.05em;
-  padding-left: 4px;
-}
-
-.input-group-premium input {
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  padding: 10px 12px;
-  color: white;
-  font-family: inherit;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-  width: 100%;
-}
-
-.input-group-premium input:focus {
-  outline: none;
-  border-color: var(--primary);
-  background: rgba(15, 23, 42, 0.6);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  margin-bottom: 0.75rem;
+  display: block;
 }
 
 .category-list-vertical {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: rgba(15, 23, 42, 0.2);
-  border-radius: 12px;
-  padding: 4px;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 18px;
+  padding: 6px;
   border: 1px solid var(--glass-border);
 }
 
 .category-row-item {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  background: transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .category-row-item:hover {
   background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
 }
 
 .category-row-item.selected {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cat-emoji {
@@ -138,56 +160,95 @@ body {
 
 .category-row-item.selected .cat-label-text {
   color: var(--text-main);
-  font-weight: 600;
+  font-weight: 750;
 }
 
 .cat-checkmark {
   color: var(--primary);
-  font-weight: bold;
-  font-size: 0.85rem;
-  margin-left: 4px;
+  font-weight: 800;
+  font-size: 0.9rem;
 }
 
 .add-item-footer {
-  margin-top: 0.5rem;
+  margin-top: auto;
+  padding-top: 2rem;
 }
 
 .save-brain-btn {
   width: 100%;
-  padding: 12px;
-  border-radius: 12px;
+  padding: 16px;
+  border-radius: 18px;
   border: none;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), #4f46e5);
   color: white;
   font-weight: 800;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 12px 24px -6px rgba(99, 102, 241, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .save-brain-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.02);
   filter: brightness(1.1);
-  box-shadow: 0 12px 20px -6px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 20px 30px -8px rgba(99, 102, 241, 0.6);
+}
+
+.save-brain-btn:active:not(:disabled) {
+  transform: scale(0.96);
 }
 
 .save-brain-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
 .save-brain-btn.success {
-  background: var(--accent);
-  box-shadow: 0 8px 16px -4px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, var(--accent), #059669);
+  box-shadow: 0 12px 24px -6px rgba(16, 185, 129, 0.5);
 }
 
 .error-text-mini {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #fb7185;
   text-align: center;
-  font-weight: 600;
-  margin-top: 0.75rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  padding: 10px;
+  background: rgba(251, 113, 133, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(251, 113, 133, 0.2);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-icon {
+  animation: spin 1s linear infinite;
+  font-size: 1rem;
+}
+
+@keyframes containerSnappy {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
