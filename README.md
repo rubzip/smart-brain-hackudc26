@@ -217,11 +217,6 @@ pip install -r backend/requierements.txt
 
 ---
 
-## 🤝 Contribuir
-¿Quieres ayudarnos a resolver el problema de Diógenes Digital? Revisa nuestro [CONTRIBUTING.md](CONTRIBUTING.md) y únete a la revolución de la productividad.
-
----
-
 ## 📄 Licencia
 
 **GNU Affero General Public License v3 (AGPL-3.0)**
