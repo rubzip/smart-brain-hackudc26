@@ -23,7 +23,10 @@ except ImportError:
 from database.connection import db
 from database.item_dao import ItemDAO
 from database.task_dao import TaskDAO
+from database.embedding_dao import EmbeddingDAO
+from utils.embeddings import get_embedding_model, generate_embeddings_for_text
 from models import (
+    ChatMessageCreate,
     DailyPlanResponse,
     DailyTask,
     FocusView,
@@ -61,6 +64,11 @@ app.add_middleware(
 # Database DAOs
 item_dao: ItemDAO | None = None
 task_dao: TaskDAO | None = None
+embedding_dao: EmbeddingDAO | None = None
+
+# Background worker control
+embedding_worker_task: asyncio.Task | None = None
+embedding_worker_running = False
 
 # Storage in-memory (sustituir por DB en producción)
 STORAGE: dict[str, dict] = {}
@@ -77,16 +85,34 @@ DAILY_PLAN_REGENERATING = False
 @app.on_event("startup")
 async def startup():
     """Initialize database connection on startup."""
-    global item_dao, task_dao
+    global item_dao, task_dao, embedding_dao, embedding_worker_task, embedding_worker_running
     await db.connect()
     item_dao = ItemDAO(db.pool)
     task_dao = TaskDAO(db.pool)
+    embedding_dao = EmbeddingDAO(db.pool)
     print("✓ DAOs initialized")
+    
+    # Start embedding background worker
+    embedding_worker_running = True
+    embedding_worker_task = asyncio.create_task(_embedding_background_worker())
+    print("✓ Embedding background worker started")
 
 
 @app.on_event("shutdown")
 async def shutdown():
     """Close database connection on shutdown."""
+    global embedding_worker_running, embedding_worker_task
+    
+    # Stop embedding worker
+    embedding_worker_running = False
+    if embedding_worker_task:
+        embedding_worker_task.cancel()
+        try:
+            await embedding_worker_task
+        except asyncio.CancelledError:
+            pass
+    print("✓ Embedding worker stopped")
+    
     await db.disconnect()
     print("✓ Database disconnected")
 
@@ -95,6 +121,103 @@ async def shutdown():
 async def health() -> dict[str, str]:
     """Health check endpoint."""
     return {"status": "ok", "database": "connected" if db.pool else "disconnected"}
+
+
+@app.get("/api/v1/embeddings/status")
+async def get_embeddings_status() -> dict:
+    """Get status of embedding generation process."""
+    if not embedding_dao:
+        return {"error": "Embedding DAO not initialized"}
+    
+    try:
+        items_without_embeddings = await embedding_dao.get_items_without_embeddings(limit=100)
+        return {
+            "worker_running": embedding_worker_running,
+            "items_pending": len(items_without_embeddings),
+            "model_loaded": get_embedding_model() is not None
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+async def _embedding_background_worker() -> None:
+    """
+    Background worker that continuously processes items without embeddings.
+    Runs every 30 seconds and processes up to 5 items per iteration.
+    """
+    global embedding_dao, embedding_worker_running
+    
+    print("🔄 Embedding worker started, checking for items to process...")
+    
+    # Pre-load the model to avoid loading it on every iteration
+    embedding_model = get_embedding_model()
+    
+    while embedding_worker_running:
+        try:
+            if not embedding_dao:
+                await asyncio.sleep(5)
+                continue
+            
+            # Get items without embeddings
+            items_to_process = await embedding_dao.get_items_without_embeddings(limit=5)
+            
+            if not items_to_process:
+                # No items to process, wait longer
+                await asyncio.sleep(30)
+                continue
+            
+            print(f"📊 Found {len(items_to_process)} items to process for embeddings")
+            
+            for item in items_to_process:
+                if not embedding_worker_running:
+                    break
+                
+                item_id = item["id"]
+                extracted_text = item.get("extracted_text", "")
+                title = item.get("title", "")
+                
+                if not extracted_text:
+                    print(f"⚠️  Item {item_id} has no text to embed, skipping")
+                    continue
+                
+                try:
+                    # Include title in the text for better context
+                    full_text = f"{title}\n\n{extracted_text}" if title else extracted_text
+                    
+                    # Generate embeddings
+                    print(f"🔮 Generating embeddings for item: {title[:50]}...")
+                    embeddings_data = await generate_embeddings_for_text(full_text, embedding_model)
+                    
+                    if not embeddings_data:
+                        print(f"⚠️  No embeddings generated for item {item_id}")
+                        continue
+                    
+                    # Store embeddings in database
+                    for chunk_index, (chunk_text, embedding_vector) in enumerate(embeddings_data):
+                        await embedding_dao.create(
+                            item_id=item_id,
+                            chunk_index=chunk_index,
+                            chunk_text=chunk_text,
+                            embedding=embedding_vector
+                        )
+                    
+                    print(f"✓ Stored {len(embeddings_data)} embeddings for item: {title[:50]}")
+                
+                except Exception as e:
+                    print(f"❌ Error generating embeddings for item {item_id}: {e}")
+                    continue
+            
+            # Wait before next iteration
+            await asyncio.sleep(10)
+        
+        except asyncio.CancelledError:
+            print("🛑 Embedding worker cancelled")
+            break
+        except Exception as e:
+            print(f"❌ Error in embedding worker: {e}")
+            await asyncio.sleep(30)
+    
+    print("✓ Embedding worker stopped")
 
 
 async def _regenerate_daily_plan_background() -> None:
@@ -614,6 +737,141 @@ async def list_sentiments() -> list[dict]:
     return SENTIMENTS_STORAGE
 
 
+@app.post("/api/v1/chat")
+async def chat_with_rag(payload: ChatMessageCreate) -> dict:
+    """
+    Chat endpoint with RAG (Retrieval-Augmented Generation).
+    Retrieves relevant context from embeddings and generates response with Ollama.
+    """
+    if not OLLAMA_AVAILABLE:
+        return {
+            "text": "⚠️ Ollama is not available. Please make sure the service is running.",
+            "role": "ai"
+        }
+    
+    if not embedding_dao:
+        return {
+            "text": "⚠️ Embedding system is not initialized.",
+            "role": "ai"
+        }
+    
+    try:
+        user_message = payload.message
+        
+        # Step 1: Generate embedding for user query
+        embedding_model = get_embedding_model()
+        if not embedding_model:
+            return {
+                "text": "⚠️ Embedding model not available. Responding without context...\n\n" + 
+                        await _call_ollama_simple(user_message),
+                "role": "ai"
+            }
+        
+        # Generate query embedding
+        query_embeddings = await generate_embeddings_for_text(user_message, embedding_model)
+        if not query_embeddings:
+            return {
+                "text": "⚠️ Could not generate embedding. Responding without context...\n\n" + 
+                        await _call_ollama_simple(user_message),
+                "role": "ai"
+            }
+        
+        query_vector = query_embeddings[0][1]  # First chunk's embedding
+        
+        # Step 2: Search for similar embeddings (RAG retrieval)
+        print(f"🔍 Searching for relevant context: {user_message[:50]}...")
+        similar_chunks = await embedding_dao.search_similar(query_vector, limit=5)
+        
+        # Step 3: Build context from retrieved chunks
+        context_parts = []
+        if similar_chunks:
+            print(f"✓ Found {len(similar_chunks)} relevant chunks")
+            for i, chunk in enumerate(similar_chunks, 1):
+                similarity = chunk.get('similarity', 0)
+                print(f"  - Chunk {i}: {chunk['title'][:50]}... (similarity: {similarity:.3f})")
+                if similarity > 0.2:  # Only use chunks with >20% similarity (lowered threshold)
+                    context_parts.append(
+                        f"[Source {i}: {chunk['title']}]\n{chunk['chunk_text']}\n"
+                    )
+        
+        # Step 4: Generate response with Ollama
+        if context_parts:
+            context_text = "\n---\n".join(context_parts)
+            prompt = f"""You are an intelligent assistant. Answer the user's question based on the provided context.
+
+RELEVANT CONTEXT:
+{context_text}
+
+USER QUESTION:
+{user_message}
+
+INSTRUCTIONS:
+- Respond in English clearly and concisely
+- Use the provided context to give accurate information
+- If the context is not sufficient, say you don't have specific information
+- Mention the sources when relevant
+- Be conversational and friendly
+
+RESPONSE:"""
+        else:
+            print("⚠️  No relevant context found, responding generally")
+            prompt = f"""You are an intelligent assistant. Answer the user's question helpfully.
+
+USER QUESTION:
+{user_message}
+
+NOTE: I don't have access to specific information about this topic in my current knowledge base.
+
+RESPONSE:"""
+        
+        # Call Ollama
+        print(f"🤖 Calling Ollama (model: gpt-oss:20b)...")
+        response = ollama.generate(
+            model='gpt-oss:20b',
+            prompt=prompt,
+            options={
+                'temperature': 0.7,
+                'top_p': 0.9,
+            }
+        )
+        
+        ai_response = response.get('response', '').strip()
+        
+        if not ai_response:
+            return {
+                "text": "⚠️ Could not generate a response. Please try again.",
+                "role": "ai"
+            }
+        
+        print(f"✓ Response generated ({len(ai_response)} characters)")
+        
+        return {
+            "text": ai_response,
+            "role": "ai"
+        }
+    
+    except Exception as e:
+        print(f"❌ Error in chat: {e}")
+        return {
+            "text": f"⚠️ Error processing your message: {str(e)}",
+            "role": "ai"
+        }
+
+
+async def _call_ollama_simple(message: str) -> str:
+    """Simple Ollama call without RAG context."""
+    try:
+        response = ollama.generate(
+            model='gpt-oss:20b',
+            prompt=f"Answer this question briefly: {message}",
+            options={'temperature': 0.7}
+        )
+        return response.get('response', 'Could not generate response.').strip()
+    except Exception as e:
+        return f"Error: {str(e)}"
+        return f"Error: {str(e)}"
+
+
 async def _call_ollama_for_plan(prompt: str) -> list[DailyTask] | None:
     """Llama a ollama para generar el plan diario, reintentando hasta 3 veces si el formato es inválido."""
     if not OLLAMA_AVAILABLE:
@@ -626,7 +884,7 @@ async def _call_ollama_for_plan(prompt: str) -> list[DailyTask] | None:
             print(f"Ollama attempt {attempt}/{max_retries}")
 
             response = ollama.generate(
-                model="phi",
+                model="gpt-oss:20b",
                 prompt=prompt,
                 stream=False,
             )

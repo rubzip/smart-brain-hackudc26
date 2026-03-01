@@ -13,3 +13,4 @@ ollama
 yt-dlp
 asyncpg
 python-dotenv
+sentence-transformers

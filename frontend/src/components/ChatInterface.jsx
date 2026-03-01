@@ -3,12 +3,16 @@ import { DeepChat } from 'deep-chat-react';
 import { API_BASE_URL } from '../config';
 
 const ChatInterface = React.memo(({ isOpen, onClose }) => {
-    const chatRequest = useMemo(() => ({
+    const connectConfig = useMemo(() => ({
         url: `${API_BASE_URL}/chat`,
         method: 'POST',
-        serialize: (body) => {
-            const lastMessage = body.messages[body.messages.length - 1];
-            return JSON.stringify({ message: lastMessage.text });
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        additionalBodyProps: {
+            retrieval_scope: [],
+            delete_item_ids: []
         }
     }), []);
 
@@ -62,8 +66,28 @@ const ChatInterface = React.memo(({ isOpen, onClose }) => {
                 </div>
 
                 <DeepChat
-                    demo={false}
-                    request={chatRequest}
+                    connect={connectConfig}
+                    requestInterceptor={(details) => {
+                        // DeepChat sends { messages: [{role, text}] }
+                        // Backend expects { message: string, retrieval_scope: [], delete_item_ids: [] }
+                        if (details.body) {
+                            const parsed = typeof details.body === 'string' 
+                                ? JSON.parse(details.body) 
+                                : details.body;
+                            
+                            const lastMessage = parsed.messages?.[parsed.messages.length - 1];
+                            const transformedBody = {
+                                message: lastMessage?.text || '',
+                                retrieval_scope: [],
+                                delete_item_ids: []
+                            };
+                            
+                            // Return the object, let DeepChat serialize it
+                            details.body = transformedBody;
+                            console.log('Sending to backend:', transformedBody);
+                        }
+                        return details;
+                    }}
                     style={chatStyle}
                     messageStyles={messageStyles}
                     inputAreaStyle={inputAreaStyle}
