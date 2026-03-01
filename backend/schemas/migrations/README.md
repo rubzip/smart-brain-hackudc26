@@ -1,4 +1,4 @@
-# Database Migrations
+# Migraciones de Base de Datos
 
 Esta carpeta contiene las migraciones de la base de datos en orden cronológico.
 

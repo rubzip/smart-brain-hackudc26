@@ -1,4 +1,4 @@
-# Database Setup
+# Configuración de Base de Datos
 
 ## PostgreSQL con pgvector usando Docker (Recomendado)
 
@@ -48,7 +48,7 @@ docker exec -i smartbrain-postgres psql -U smartbrain_user -d smartbrain < backe
 ## Instalación manual (Alternativa)
 
 <details>
-<summary>Click para ver instrucciones de instalación manual</summary>
+<summary>Haz clic para ver instrucciones de instalación manual</summary>
 
 ### Instalación de PostgreSQL y pgvector
 

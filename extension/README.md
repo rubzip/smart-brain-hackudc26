@@ -1,44 +1,44 @@
 # 🧠 Smart Brain Link Saver
 
-A minimalist cross-browser extension to quickly categorize and save links. Works on **Chrome** and **Firefox**.
+Extensión minimalista multiplataforma para categorizar y guardar enlaces rápidamente. Funciona en **Chrome** y **Firefox**.
 
-## 🚀 Setup & Installation
+## 🚀 Configuración e instalación
 
-Follow these steps to activate the extension in your browser:
+Sigue estos pasos para activar la extensión en tu navegador:
 
-### 1. Build the Project
-Make sure you have dependencies installed and run the build command:
+### 1. Construir el proyecto
+Asegúrate de tener dependencias instaladas y ejecuta el build:
 ```bash
 cd extension
 npm install
 npm run build
 ```
 
-### 2. Load into Chrome
-1. Open Google Chrome and go to `chrome://extensions/`.
-2. Toggle **Developer mode** (switch in the top right corner) to **ON**.
-3. Click the **Load unpacked** button.
-4. Select the **`extension/dist`** folder that was generated in the previous step.
+### 2. Cargar en Chrome
+1. Abre Google Chrome y entra en `chrome://extensions/`.
+2. Activa el **Modo desarrollador** (arriba a la derecha).
+3. Pulsa **Cargar descomprimida**.
+4. Selecciona la carpeta **`extension/dist`** generada en el paso anterior.
 
-### 2. Load into Firefox
-1. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
-2. Click **Load Temporary Add-on...**.
-3. Navigate to the **`extension/dist`** folder and select the **`manifest.json`** file.
+### 3. Cargar en Firefox
+1. Abre Firefox y entra en `about:debugging#/runtime/this-firefox`.
+2. Pulsa **Cargar complemento temporal...**.
+3. Ve a la carpeta **`extension/dist`** y selecciona el archivo **`manifest.json`**.
 
 ---
 
-## 🛠️ How It Works
+## 🛠️ Cómo funciona
 
-- **Auto Capture**: The extension automatically detects the title and URL of your current tab.
-- **Emoji Categories**:
-  - 💼 **Work**: For professional or job-related links.
-  - 🏠 **Personal**: For personal interests and hobbies.
-  - ⏳ **Watch Later**: For articles or videos you want to check out later.
-- **Save**: Clicking "Save to Brain" sends a POST request to `http://localhost:5000/api/save` (configurable in `App.jsx`).
+- **Captura automática**: detecta automáticamente el título y la URL de la pestaña actual.
+- **Categorías con emojis**:
+  - 💼 **Work**: enlaces profesionales o de trabajo.
+  - 🏠 **Personal**: enlaces personales e intereses.
+  - ⏳ **Watch Later**: artículos o videos para revisar luego.
+- **Guardado**: al pulsar "Save to Brain" envía un POST a `http://localhost:5000/api/save` (configurable en `App.jsx`).
 
-## ⚡ Development
+## ⚡ Desarrollo
 
-If you want to modify the design or functionality:
-1. Edit files in `src/`.
-2. Run `npm run build` to update the `dist` folder.
-3. Go to `chrome://extensions/` and click the **Update** icon (circular arrow) on the extension card.
+Si quieres modificar diseño o funcionalidad:
+1. Edita archivos en `src/`.
+2. Ejecuta `npm run build` para actualizar `dist`.
+3. En `chrome://extensions/`, pulsa el icono **Actualizar** (flecha circular) de la tarjeta de la extensión.
