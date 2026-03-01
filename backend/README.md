@@ -89,8 +89,9 @@ DATABASE_URL=postgresql://smartbrain_user:smartbrain_dev_password@localhost:5432
 - **DAOs**: `ItemDAO`, `TaskDAO`, `EmbeddingDAO`
 
 ### Capa AI/ML
-- **LLM**: Ollama `llama3.2` para chat y generación de tareas
-- **Embeddings**: `sentence-transformers/all-MiniLM-L6-v2` (384 dimensiones)
+- **LLM**: Ollama `gpt-oss:20b` (recomendado) o `llama3.2` (más ligero)
+  - Licencias: Apache 2.0 y Llama Community License
+- **Embeddings**: `sentence-transformers/all-MiniLM-L6-v2` (384 dimensiones, Apache 2.0)
 - **RAG**: búsqueda semántica por similitud coseno con pgvector
 - **Worker en segundo plano**: generación automática de embeddings para nuevos ítems
 

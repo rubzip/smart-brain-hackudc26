@@ -9,9 +9,12 @@ Este sistema genera automáticamente embeddings vectoriales para todos los items
 ### Componentes
 
 1. **`utils/embeddings.py`**: Utilidades para generar embeddings
-   - Modelo: `sentence-transformers/all-MiniLM-L6-v2` (384 dimensiones)
-   - Chunking: Divide textos largos en fragmentos de ~500 caracteres con overlap de 50
-   - Proceso asíncrono con thread pool para operaciones CPU-bound
+   - **Modelo**: `sentence-transformers/all-MiniLM-L6-v2` (384 dimensiones)
+     - Licencia: **Apache 2.0** (software libre)
+     - Entrenado en 215 millones de pares de oraciones
+     - Tamaño: ~85MB, optimizado para CPU
+   - **Chunking**: Divide textos largos en fragmentos de ~500 caracteres con overlap de 50
+   - **Proceso**: Asíncrono con thread pool para operaciones CPU-bound
 
 2. **`database/embedding_dao.py`**: Acceso a datos de embeddings
    - `create()`: Almacena embedding chunk con upsert
@@ -128,9 +131,9 @@ embedding vector(384)  -- Cambiar según dimensión del modelo
 
 ## Requisitos
 
-- `sentence-transformers>=5.0.0`
-- `torch>=2.0.0` (versión CPU incluida para ahorrar espacio)
-- PostgreSQL con extensión `pgvector`
+- `sentence-transformers>=5.0.0` (Licencia: Apache 2.0 - software libre)
+- `torch>=2.0.0` (Licencia: BSD - software libre, versión CPU incluida para ahorrar espacio)
+- PostgreSQL con extensión `pgvector` (Licencia: PostgreSQL License - software libre)
 
 ## Monitoreo
 
@@ -170,9 +173,9 @@ uv pip install sentence-transformers
 
 La primera vez descargará el modelo (~90MB), tarda unos segundos.
 
-## Próximos Pasos
+## Próximos pasos
 
-1. **Implementar endpoint de búsqueda semántica**: `GET /api/v1/items/search-semantic`
-2. **Integrar RAG en el chat**: Usar embeddings para recuperar contexto relevante
-3. **Reindexación**: Endpoint para regenerar embeddings de items existentes
-4. **Métricas**: Tracking de tiempo de procesamiento y calidad de embeddings
+1. **Endpoint de búsqueda semántica**: `GET /api/v1/items/search-semantic`
+2. **Reindexación**: Endpoint para regenerar embeddings de items existentes
+3. **Métricas**: Tracking de tiempo de procesamiento y calidad de embeddings
+4. **Soportar múltiples modelos**: Permitir elegir entre diferentes modelos de embeddings

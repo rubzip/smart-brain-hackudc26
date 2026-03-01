@@ -34,8 +34,9 @@ Debido a las limitaciones del reto no se han podido implementar todas las funcio
 ### [Backend](./backend)
 - **Framework**: FastAPI 0.134.0
 - **Database**: PostgreSQL 16 + pgvector para búsqueda por similitud vectorial
-- **LLM**: Ollama (llama3.2 - **Open Weights**)
-- **Embeddings**: sentence-transformers (all-MiniLM-L6-v2, 384 dimensions)
+- **LLM**: Ollama con modelos libres (`gpt-oss:20b` por defecto, `llama3.2` como alternativa)
+  - Licencias: Apache 2.0 (software y pesos libres) y Llama Community License (parcialmente libre, con restricciones de usos permitidos y limitaciones en número de usuarios)
+- **Embeddings**: sentence-transformers/all-MiniLM-L6-v2 (384 dimensiones, Licencia Apache 2.0)
 - **RAG**: Retrieval-Augmented Generation con búsqueda semántica
 - **Methodology**: Test Driven Development (TDD)
 

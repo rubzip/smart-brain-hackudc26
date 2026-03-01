@@ -6,12 +6,12 @@ El sistema de chat integra Ollama con búsqueda semántica (RAG - Retrieval-Augm
 
 ## Arquitectura
 
-### Flujo de Procesamiento
+### Flujo de procesamiento
 
 ```
 [Mensaje Usuario] 
     ↓
-[Generar Embedding Query]
+[Generar Embedding Query] (all-MiniLM-L6-v2, Apache 2.0)
     ↓
 [Búsqueda Semántica en Embeddings] (Top 5 chunks)
     ↓
@@ -21,10 +21,12 @@ El sistema de chat integra Ollama con búsqueda semántica (RAG - Retrieval-Augm
     ↓
 [Generar Prompt con Contexto + Pregunta]
     ↓
-[Llamar a Ollama llama3.2]
+[Llamar a Ollama: gpt-oss:20b o llama3.2]
     ↓
 [Retornar Respuesta]
 ```
+
+**Nota**: Todos los modelos usados son software libre con licencias abiertas (Apache 2.0, Llama Community License), aunque en el caso de Llama la licencia no cumple totalmente la definición de software libre/open source al imponer ciertas restricciones sobre su ámbito de uso.
 
 ## Endpoint
 
@@ -75,13 +77,24 @@ const chatRequest = {
 
 ## Configuración
 
-### Modelo de Lenguaje
+### Modelos de Lenguaje
 
-En `main.py`, el chat usa el modelo `llama3.2`:
+En `main.py`, el chat soporta múltiples modelos abiertos:
+
+**Principal: `gpt-oss:20b`** (Recomendado)
+- Licencia: **Apache 2.0** (software libre)
+- Parámetros: 20 mil millones
+- Mejor balance rendimiento/calidad
+- Tiempo respuesta: ~3-5 segundos
+
+**Alternativa: `llama3.2`**
+- Licencia: **Llama 3.2 Community License** (software libre para investigación y uso personal)
+- Parámetros: 3.2 mil millones o superior
+- Más ligero pero menos potente
 
 ```python
 response = ollama.generate(
-    model='llama3.2',
+    model='gpt-oss:20b',  # O 'llama3.2' para versión más ligera
     prompt=prompt,
     options={
         'temperature': 0.7,  # Creatividad: 0.0-1.0
@@ -163,7 +176,7 @@ El sistema imprime logs informativos:
   - Chunk 1: Vite | Next Generation Frontend Tooling... (similarity: 0.856)
   - Chunk 2: Vite | Next Generation Frontend Tooling... (similarity: 0.712)
   - Chunk 3: Vite | Next Generation Frontend Tooling... (similarity: 0.643)
-🤖 Llamando a Ollama (modelo: llama3.2)...
+🤖 Llamando a Ollama (modelo: gpt-oss:20b)...
 ✓ Respuesta generada (342 caracteres)
 ```
 
@@ -255,6 +268,6 @@ curl http://localhost:5000/api/v1/embeddings/status
 
 ### Ollama lento
 
-1. Usar un modelo más ligero: `llama3.2:1b` en lugar de `llama3.2`
-2. Reducir contexto enviado (menos chunks)
+1. Usar un modelo más ligero: `llama3.2` (~3.2B) en lugar de `gpt-oss:20b` (20B)
+2. Reducir contexto enviado (menos chunks, cambiar `limit=5` a `limit=3`)
 3. Implementar timeout y respuesta rápida
