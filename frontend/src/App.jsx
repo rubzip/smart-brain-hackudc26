@@ -258,9 +258,6 @@ function App() {
     }, 5000);
   };
 
-
-  const [currentSuggestion, setCurrentSuggestion] = useState(0)
-
   const completedCount = tasks.filter(t => t.completed).length
   const progress = (completedCount / tasks.length) * 100
 
@@ -342,7 +339,6 @@ function App() {
       }));
 
       setSearchResults(mappedResults);
-      setCurrentSuggestion(0);
     } catch (error) {
       console.error('Search failed:', error);
     }
@@ -351,16 +347,7 @@ function App() {
   const clearSearch = () => {
     setIsSearching(false);
     setSearchResults([]);
-    setCurrentSuggestion(0);
   };
-
-  const nextSuggestion = () => {
-    setCurrentSuggestion((prev) => (prev + 1) % suggestions.length)
-  }
-
-  const prevSuggestion = () => {
-    setCurrentSuggestion((prev) => (prev - 1 + suggestions.length) % suggestions.length)
-  }
 
   return (
     <div className="app-shell">
@@ -403,10 +390,6 @@ function App() {
           ) : (
             <Suggestions
               suggestions={isSearching ? searchResults : suggestions}
-              currentSuggestion={currentSuggestion}
-              prevSuggestion={prevSuggestion}
-              nextSuggestion={nextSuggestion}
-              setCurrentSuggestion={setCurrentSuggestion}
             />
           )}
 

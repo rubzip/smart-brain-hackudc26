@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const Suggestions = ({ suggestions, currentSuggestion, prevSuggestion, nextSuggestion, setCurrentSuggestion }) => {
+const Suggestions = ({ suggestions }) => {
+    const [currentSuggestion, setCurrentSuggestion] = useState(0);
+
+    const nextSuggestion = () => {
+        setCurrentSuggestion((prev) => (prev + 1) % suggestions.length);
+    };
+
+    const prevSuggestion = () => {
+        setCurrentSuggestion((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+    };
     const getYoutubeId = (url) => {
         if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
